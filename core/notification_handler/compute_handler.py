@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.utils import timezone
 
 from core.models import Invoice, InvoiceInstance, FlavorPrice
@@ -5,7 +6,7 @@ from core.models import Invoice, InvoiceInstance, FlavorPrice
 
 class ComputeHandler:
     def get_tenant_progress_invoice(self, tenant_id):
-        return Invoice.objects.filter(project_tenant_id=tenant_id, state=Invoice.InvoiceState.IN_PROGRESS).first()
+        return Invoice.objects.filter(project__tenant_id=tenant_id, state=Invoice.InvoiceState.IN_PROGRESS).first()
 
     def handle(self, event_type, payload):
         if event_type == 'compute.instance.update':
@@ -25,6 +26,7 @@ class ComputeHandler:
 
             # TODO: Handle flavor change
 
+    @transaction.atomic
     def handle_active_state(self, invoice, payload):
         display_name = payload['display_name']
         instance_id = payload['instance_id']
@@ -53,6 +55,7 @@ class ComputeHandler:
                 monthly_price=flavor_price.monthly_price,
             )
 
+    @transaction.atomic
     def handle_delete_state(self, invoice, payload):
         instance_id = payload['instance_id']
         flavor_id = payload['instance_flavor_id']

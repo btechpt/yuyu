@@ -1,9 +1,10 @@
-from calendar import monthrange
 from datetime import timedelta
 
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from djmoney.models.fields import MoneyField
+from djmoney.money import Money
 
 
 class FlavorPrice(models.Model):
@@ -44,11 +45,14 @@ class Invoice(models.Model):
     @property
     def subtotal(self):
         # Need to optimize? currently price is calculated on the fly, maybe need to save to db to make performance faster?
-        # Instance Price
         instance_price = sum(map(lambda x: x.price_charged, self.instances.all()))
+        fip_price = sum(map(lambda x: x.price_charged, self.floating_ips.all()))
+        volume_price = sum(map(lambda x: x.price_charged, self.volumes.all()))
+        price = instance_price + fip_price + volume_price
+        if price == 0:
+            return Money(amount=price, currency=settings.DEFAULT_CURRENCY)
 
-        # TODO: Add other price
-        return instance_price
+        return instance_price + fip_price + volume_price
 
 
 class InvoiceInstance(models.Model):
@@ -65,16 +69,20 @@ class InvoiceInstance(models.Model):
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
 
     @property
-    def price_charged(self):
-        # TODO: Fix price calculation
-        # Currently only calculate daily price and it can return zero if end date not yet 1 day
-
+    def adjusted_end_date(self):
         current_date = timezone.now()
         if self.end_date:
             end_date = self.end_date
         else:
             end_date = current_date
 
+        return end_date
+
+    @property
+    def price_charged(self):
+        # TODO: Fix price calculation
+        # Currently only calculate daily price and it can return zero if end date not yet 1 day
+        end_date = self.adjusted_end_date
         # TODO: For Testing, please delete
         end_date += timedelta(days=1)
 
@@ -88,11 +96,32 @@ class InvoiceFloatingIp(models.Model):
     ip = models.CharField(max_length=256)
     current_state = models.CharField(max_length=256)
     start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
+    end_date = models.DateTimeField(default=None, blank=True, null=True)
     daily_price = MoneyField(max_digits=10, decimal_places=0)
     monthly_price = MoneyField(max_digits=10, decimal_places=0)
-    created_at = models.DateTimeField(auto_created=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def adjusted_end_date(self):
+        current_date = timezone.now()
+        if self.end_date:
+            end_date = self.end_date
+        else:
+            end_date = current_date
+
+        return end_date
+
+    @property
+    def price_charged(self):
+        # TODO: Fix price calculation
+        # Currently only calculate daily price and it can return zero if end date not yet 1 day
+        end_date = self.adjusted_end_date
+        # TODO: For Testing, please delete
+        end_date += timedelta(days=1)
+
+        days = (end_date - self.start_date).days
+        return self.daily_price * days
 
 
 class InvoiceVolume(models.Model):
@@ -102,8 +131,29 @@ class InvoiceVolume(models.Model):
     space_allocation_gb = models.IntegerField()
     current_state = models.CharField(max_length=256)
     start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
+    end_date = models.DateTimeField(default=None, blank=True, null=True)
     daily_price = MoneyField(max_digits=10, decimal_places=0)
     monthly_price = MoneyField(max_digits=10, decimal_places=0)
-    created_at = models.DateTimeField(auto_created=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def adjusted_end_date(self):
+        current_date = timezone.now()
+        if self.end_date:
+            end_date = self.end_date
+        else:
+            end_date = current_date
+
+        return end_date
+
+    @property
+    def price_charged(self):
+        # TODO: Fix price calculation
+        # Currently only calculate daily price and it can return zero if end date not yet 1 day
+        end_date = self.adjusted_end_date
+        # TODO: For Testing, please delete
+        end_date += timedelta(days=1)
+
+        days = (end_date - self.start_date).days
+        return self.daily_price * self.space_allocation_gb * days

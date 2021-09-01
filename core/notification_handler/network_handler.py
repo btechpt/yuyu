@@ -57,12 +57,12 @@ class NetworkHandler:
     def handle_delete(self, invoice: Invoice, payload):
         fip_id = payload['floatingip']['id']
 
-        invoice_ip = FloatingIpsPrice.objects.filter(
+        invoice_ip = InvoiceFloatingIp.objects.filter(
             invoice=invoice,
             fip_id=fip_id,
         ).first()
 
         if invoice_ip:
             invoice_ip.end_date = timezone.now()
-            invoice_ip.state = 'released'
+            invoice_ip.current_state = 'released'
             invoice_ip.save()

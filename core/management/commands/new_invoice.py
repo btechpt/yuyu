@@ -4,7 +4,7 @@ from typing import List
 from django.core.management import BaseCommand
 from django.utils import timezone
 
-from core.models import Invoice, InvoiceInstance
+from core.models import Invoice, InvoiceInstance, InvoiceFloatingIp, InvoiceVolume
 
 LOG = logging.getLogger("rintik_new_invoice")
 
@@ -27,6 +27,17 @@ class Command(BaseCommand):
             instance.end_date = self.close_date
             instance.save()
 
+        # Close Active Floating
+        active_ips: List[InvoiceFloatingIp] = active_invoice.floating_ips.filter(end_date=None).all()
+        for ip in active_ips:
+            ip.end_date = self.close_date
+            ip.save()
+
+        # Close Active Volume
+        active_volumes: List[InvoiceVolume] = active_invoice.volumes.filter(end_date=None).all()
+        for volume in active_volumes:
+            volume.end_date = self.close_date
+            volume.save()
 
         # Save current instance
         active_invoice.state = Invoice.InvoiceState.FINISHED
@@ -57,3 +68,30 @@ class Command(BaseCommand):
                 monthly_price=instance.monthly_price,
             )
 
+        # Cloning Active Ips to Continue in next invoice
+        # Using the same price
+        for ip in active_ips:
+            InvoiceFloatingIp.objects.create(
+                invoice=new_invoice,
+                fip_id=ip.fip_id,
+                ip=ip.ip,
+                current_state=ip.current_state,
+                start_date=ip.end_date,
+                daily_price=ip.daily_price,
+                monthly_price=ip.monthly_price,
+            )
+
+        # Cloning Active Volumes to Continue in next invoice
+        # Using the same price
+        for volume in active_volumes:
+            InvoiceVolume.objects.create(
+                invoice=new_invoice,
+                volume_id=volume.volume_id,
+                volume_name=volume.volume_name,
+                volume_type_id=volume.volume_type_id,
+                space_allocation_gb=volume.space_allocation_gb,
+                current_state=volume.current_state,
+                start_date=volume.end_date,
+                daily_price=volume.daily_price,
+                monthly_price=volume.monthly_price,
+            )

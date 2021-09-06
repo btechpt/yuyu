@@ -41,13 +41,12 @@ class Command(BaseCommand):
         finally:
             transport.cleanup()
 
-    def notify_server(self, transport, topic):
+    def notify_server(self, transport, topics):
         endpoints = [NotifyEndpoint()]
-        target = messaging.Target(topic='notifications')
-        target_versioned = messaging.Target(topic='versioned_notifications')
+        targets = list(map(lambda t: messaging.Target(topic=t), topics))
         server = notify.get_notification_listener(
             transport,
-            [target, target_versioned],
+            targets,
             endpoints,
             executor='threading'
         )
@@ -68,5 +67,5 @@ class Command(BaseCommand):
 
         self.notify_server(
             transport=transport,
-            topic=settings.RINTIK_NOTIFICATION_TOPIC,
+            topics=settings.RINTIK_NOTIFICATION_TOPICS,
         )

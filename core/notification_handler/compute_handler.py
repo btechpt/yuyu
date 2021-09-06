@@ -33,6 +33,7 @@ class ComputeHandler:
         flavor_id = payload['instance_flavor_id']
         state = payload['state']
 
+        # TODO: More filter if update is implemented
         is_exists = InvoiceInstance.objects.filter(
             invoice=invoice,
             instance_id=instance_id,
@@ -61,14 +62,14 @@ class ComputeHandler:
         flavor_id = payload['instance_flavor_id']
         state = payload['state']
 
+        # TODO: More filter if update is implemented
         invoice_instance = InvoiceInstance.objects.filter(
             invoice=invoice,
             instance_id=instance_id,
-            flavor_id=flavor_id,
-            state=state
+            flavor_id=flavor_id
         ).first()
 
         if invoice_instance:
             invoice_instance.end_date = timezone.now()
-            invoice_instance.state = state
+            invoice_instance.current_state = state
             invoice_instance.save()

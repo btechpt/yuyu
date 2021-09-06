@@ -150,4 +150,4 @@ DEFAULT_CURRENCY = "IDR"
 
 # Notification
 RINTIK_NOTIFICATION_URL = "rabbit://openstack:HcmHchx2wbxZYjvbZUFkA5FObioWSkUY74DCpgvB@172.10.10.10:5672/"
-RINTIK_NOTIFICATION_TOPIC = "notifications"
+RINTIK_NOTIFICATION_TOPICS = ["notifications", "cinder_notifications", "versioned_notifications"]

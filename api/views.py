@@ -3,11 +3,12 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 import dateutil.parser
+import pytz
 
 from api.serializers import FlavorPriceSerializer, FloatingIpsPriceSerializer, VolumePriceSerializer, InvoiceSerializer, \
     SimpleInvoiceSerializer
 from core.models import FlavorPrice, FloatingIpsPrice, VolumePrice, Invoice, BillingProject, InvoiceInstance, \
-    InvoiceFloatingIp
+    InvoiceFloatingIp, InvoiceVolume
 
 
 class FlavorPriceViewSet(viewsets.ModelViewSet):
@@ -31,6 +32,13 @@ class InvoiceViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         tenant_id = self.request.query_params.get('tenant_id', None)
         return Invoice.objects.filter(project__tenant_id=tenant_id).order_by('-start_date')
+
+    def parse_time(self, time):
+        dt = dateutil.parser.isoparse(time)
+        if not dt.tzinfo:
+            return pytz.UTC.localize(dt=dt)
+
+        return dt
 
     @action(detail=False)
     def simple_list(self, request):
@@ -57,7 +65,7 @@ class InvoiceViewSet(viewsets.ModelViewSet):
             flavor_price = FlavorPrice.objects.filter(flavor_id=instance['flavor_id']).first()
 
             # Create new invoice instance
-            start_date = dateutil.parser.isoparse(instance['start_date'])
+            start_date = self.parse_time(instance['start_date'])
             if start_date < month_first_day:
                 start_date = month_first_day
             InvoiceInstance.objects.create(
@@ -76,9 +84,10 @@ class InvoiceViewSet(viewsets.ModelViewSet):
             fip_price = FloatingIpsPrice.objects.first()
 
             # Create new invoice floating ip
-            start_date = dateutil.parser.isoparse(fip['start_date'])
+            start_date = self.parse_time(fip['start_date'])
             if start_date < month_first_day:
                 start_date = month_first_day
+
             InvoiceFloatingIp.objects.create(
                 invoice=new_invoice,
                 fip_id=fip['fip_id'],
@@ -87,6 +96,27 @@ class InvoiceViewSet(viewsets.ModelViewSet):
                 start_date=start_date,
                 daily_price=fip_price.daily_price,
                 monthly_price=fip_price.monthly_price,
+            )
+
+        for volume in request.data['volumes']:
+            # Get Price
+            volume_price = VolumePrice.objects.filter(volume_type_id=volume['volume_type_id']).first()
+
+            # Create new invoice floating ip
+            start_date = self.parse_time(volume['start_date'])
+            if start_date < month_first_day:
+                start_date = month_first_day
+
+            InvoiceVolume.objects.create(
+                invoice=new_invoice,
+                volume_id=volume['volume_id'],
+                volume_name=volume['volume_name'],
+                volume_type_id=volume['volume_type_id'],
+                space_allocation_gb=volume['space_allocation_gb'],
+                current_state=volume['current_state'],
+                start_date=start_date,
+                daily_price=volume_price.daily_price,
+                monthly_price=volume_price.monthly_price,
             )
 
         serializer = InvoiceSerializer(new_invoice)

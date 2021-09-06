@@ -80,10 +80,12 @@ class InvoiceInstance(models.Model):
 
     @property
     def price_charged(self):
+        # 1. Belum 1 hari -> Kehitung 1 hari
+        # 2. Perhitungan bulanan
+        # 3. 1 Bulan 15 hari gimana?
         # TODO: Fix price calculation
         # Currently only calculate daily price and it can return zero if end date not yet 1 day
         end_date = self.adjusted_end_date
-        # TODO: For Testing, please delete
         end_date += timedelta(days=1)
 
         days = (end_date - self.start_date).days
@@ -117,7 +119,6 @@ class InvoiceFloatingIp(models.Model):
         # TODO: Fix price calculation
         # Currently only calculate daily price and it can return zero if end date not yet 1 day
         end_date = self.adjusted_end_date
-        # TODO: For Testing, please delete
         end_date += timedelta(days=1)
 
         days = (end_date - self.start_date).days
@@ -126,8 +127,9 @@ class InvoiceFloatingIp(models.Model):
 
 class InvoiceVolume(models.Model):
     invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE, related_name='volumes')
-    volume_id = models.CharField(max_length=266)
-    volume_type_id = models.CharField(max_length=266)
+    volume_id = models.CharField(max_length=256)
+    volume_name = models.CharField(max_length=256)
+    volume_type_id = models.CharField(max_length=256)
     space_allocation_gb = models.IntegerField()
     current_state = models.CharField(max_length=256)
     start_date = models.DateTimeField()
@@ -152,7 +154,6 @@ class InvoiceVolume(models.Model):
         # TODO: Fix price calculation
         # Currently only calculate daily price and it can return zero if end date not yet 1 day
         end_date = self.adjusted_end_date
-        # TODO: For Testing, please delete
         end_date += timedelta(days=1)
 
         days = (end_date - self.start_date).days

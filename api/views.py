@@ -1,29 +1,55 @@
-from django.utils import timezone
-from rest_framework import viewsets
-from rest_framework.decorators import action
-from rest_framework.response import Response
 import dateutil.parser
 import pytz
+from django.db import transaction
+from django.utils import timezone
+from rest_framework import viewsets, serializers
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
-from api.serializers import FlavorPriceSerializer, FloatingIpsPriceSerializer, VolumePriceSerializer, InvoiceSerializer, \
-    SimpleInvoiceSerializer
-from core.models import FlavorPrice, FloatingIpsPrice, VolumePrice, Invoice, BillingProject, InvoiceInstance, \
-    InvoiceFloatingIp, InvoiceVolume
-
-
-class FlavorPriceViewSet(viewsets.ModelViewSet):
-    queryset = FlavorPrice.objects
-    serializer_class = FlavorPriceSerializer
-
-
-class FloatingIpsPriceViewSet(viewsets.ModelViewSet):
-    queryset = FloatingIpsPrice.objects
-    serializer_class = FloatingIpsPriceSerializer
+from api.serializers import InvoiceSerializer, SimpleInvoiceSerializer
+from core.models import Invoice, BillingProject
+from core.component import component
+from core.utils.dynamic_setting import get_dynamic_settings, get_dynamic_setting, set_dynamic_setting, BILLING_ENABLED
 
 
-class VolumePriceViewSet(viewsets.ModelViewSet):
-    queryset = VolumePrice.objects
-    serializer_class = VolumePriceSerializer
+def get_generic_model_view_set(model):
+    name = type(model).__name__
+    meta_params = {
+        "model": model,
+        "fields": "__all__"
+    }
+    meta_class = type("Meta", (object,), meta_params)
+    serializer_class = type(f"{name}Serializer", (serializers.ModelSerializer,), {"Meta": meta_class})
+
+    view_set_params = {
+        "model": model,
+        "queryset": model.objects,
+        "serializer_class": serializer_class
+    }
+
+    return type(f"{name}ViewSet", (viewsets.ModelViewSet,), view_set_params)
+
+
+class DynamicSettingViewSet(viewsets.ViewSet):
+    def list(self, request):
+        return Response(get_dynamic_settings())
+
+    def retrieve(self, request, pk=None):
+        return Response({
+            pk: get_dynamic_setting(pk)
+        })
+
+    def update(self, request, pk=None):
+        set_dynamic_setting(pk, request.data['value'])
+        return Response({
+            pk: get_dynamic_setting(pk)
+        })
+
+    def partial_update(self, request, pk=None):
+        set_dynamic_setting(pk, request.data['value'])
+        return Response({
+            pk: get_dynamic_setting(pk)
+        })
 
 
 class InvoiceViewSet(viewsets.ModelViewSet):
@@ -46,79 +72,48 @@ class InvoiceViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=['POST'])
-    def init_invoice(self, request):
-        project, created = BillingProject.objects.get_or_create(tenant_id=request.data['tenant_id'])
+    def enable_billing(self, request):
+        # TODO: Handle unknown price
+        self.handle_init_billing(request.data)
+
+        return Response({
+            "status": "success"
+        })
+
+    @transaction.atomic
+    def handle_init_billing(self, data):
+        set_dynamic_setting(BILLING_ENABLED, True)
+
+        projects = {}
+        invoices = {}
 
         date_today = timezone.now()
         month_first_day = date_today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
-        new_invoice = Invoice.objects.create(
-            project=project,
-            start_date=month_first_day,
-            state=Invoice.InvoiceState.IN_PROGRESS
-        )
-        new_invoice.save()
+        for name, handler in component.INVOICE_HANDLER.items():
+            payloads = data[name]
 
-        # Create Instance
-        for instance in request.data['instances']:
-            # Get Price
-            flavor_price = FlavorPrice.objects.filter(flavor_id=instance['flavor_id']).first()
+            for payload in payloads:
 
-            # Create new invoice instance
-            start_date = self.parse_time(instance['start_date'])
-            if start_date < month_first_day:
-                start_date = month_first_day
-            InvoiceInstance.objects.create(
-                invoice=new_invoice,
-                instance_id=instance['instance_id'],
-                name=instance['name'],
-                flavor_id=instance['flavor_id'],
-                current_state=instance['current_state'],
-                start_date=start_date,
-                daily_price=flavor_price.daily_price,
-                monthly_price=flavor_price.monthly_price,
-            )
+                if payload['tenant_id'] not in projects:
+                    project, created = BillingProject.objects.get_or_create(tenant_id=payload['tenant_id'])
+                    projects[payload['tenant_id']] = project
 
-        for fip in request.data['floating_ips']:
-            # Get Price
-            fip_price = FloatingIpsPrice.objects.first()
+                if payload['tenant_id'] not in invoices:
+                    invoice = Invoice.objects.create(
+                        project=projects[payload['tenant_id']],
+                        start_date=month_first_day,
+                        state=Invoice.InvoiceState.IN_PROGRESS
+                    )
+                    invoices[payload['tenant_id']] = invoice
 
-            # Create new invoice floating ip
-            start_date = self.parse_time(fip['start_date'])
-            if start_date < month_first_day:
-                start_date = month_first_day
+                start_date = self.parse_time(payload['start_date'])
+                if start_date < month_first_day:
+                    start_date = month_first_day
 
-            InvoiceFloatingIp.objects.create(
-                invoice=new_invoice,
-                fip_id=fip['fip_id'],
-                ip=fip['ip'],
-                current_state=fip['current_state'],
-                start_date=start_date,
-                daily_price=fip_price.daily_price,
-                monthly_price=fip_price.monthly_price,
-            )
+                payload['start_date'] = start_date
+                payload['invoice'] = invoices[payload['tenant_id']]
 
-        for volume in request.data['volumes']:
-            # Get Price
-            volume_price = VolumePrice.objects.filter(volume_type_id=volume['volume_type_id']).first()
-
-            # Create new invoice floating ip
-            start_date = self.parse_time(volume['start_date'])
-            if start_date < month_first_day:
-                start_date = month_first_day
-
-            InvoiceVolume.objects.create(
-                invoice=new_invoice,
-                volume_id=volume['volume_id'],
-                volume_name=volume['volume_name'],
-                volume_type_id=volume['volume_type_id'],
-                space_allocation_gb=volume['space_allocation_gb'],
-                current_state=volume['current_state'],
-                start_date=start_date,
-                daily_price=volume_price.daily_price,
-                monthly_price=volume_price.monthly_price,
-            )
-
-        serializer = InvoiceSerializer(new_invoice)
-
-        return Response(serializer.data)
+                # create not accepting tenant_id, delete it
+                del payload['tenant_id']
+                handler.create(payload)

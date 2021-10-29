@@ -173,9 +173,9 @@ class InvoiceImage(BaseModel, InvoiceComponentMixin):
 
     # Informative
     name = models.CharField(max_length=256)
-    #
-    # @property
-    # def price_charged(self):
-    #     price_without_allocation = super().price_charged
-    #     return price_without_allocation * math.ceil(self.space_allocation_gb)
+
+    @property
+    def price_charged(self):
+        price_without_allocation = super().price_charged
+        return price_without_allocation * math.ceil(self.space_allocation_gb)
 # end region

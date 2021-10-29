@@ -1,34 +1,66 @@
-from datetime import timedelta
+import math
 
 from django.conf import settings
 from django.db import models
-from django.utils import timezone
 from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 
+from core.component import labels
+from core.utils.model_utils import BaseModel, TimestampMixin, PriceMixin, InvoiceComponentMixin
 
-class FlavorPrice(models.Model):
+
+# region Dynamic Setting
+class DynamicSetting(BaseModel):
+    class DataType(models.IntegerChoices):
+        BOOLEAN = 1
+        INT = 2
+        STR = 3
+        JSON = 4
+
+    key = models.CharField(max_length=256, unique=True, db_index=True)
+    value = models.TextField()
+    type = models.IntegerField(choices=DataType.choices)
+
+
+# end region
+
+# region Pricing
+class FlavorPrice(BaseModel, TimestampMixin, PriceMixin):
     flavor_id = models.CharField(max_length=256)
-    daily_price = MoneyField(max_digits=10, decimal_places=0)
-    monthly_price = MoneyField(max_digits=10, decimal_places=0)
 
 
-class FloatingIpsPrice(models.Model):
-    daily_price = MoneyField(max_digits=10, decimal_places=0)
-    monthly_price = MoneyField(max_digits=10, decimal_places=0)
+class FloatingIpsPrice(BaseModel, TimestampMixin, PriceMixin):
+    # No need for any additional field
+    pass
 
 
-class VolumePrice(models.Model):
+class VolumePrice(BaseModel, TimestampMixin, PriceMixin):
     volume_type_id = models.CharField(max_length=256)
-    daily_price = MoneyField(max_digits=10, decimal_places=0)
-    monthly_price = MoneyField(max_digits=10, decimal_places=0)
 
 
-class BillingProject(models.Model):
+class RouterPrice(BaseModel, TimestampMixin, PriceMixin):
+    # No need for any additional field
+    pass
+
+
+class SnapshotPrice(BaseModel, TimestampMixin, PriceMixin):
+    # No need for any additional field
+    pass
+
+
+class ImagePrice(BaseModel, TimestampMixin, PriceMixin):
+    # No need for any additional field
+    pass
+
+
+# end region
+
+# region Invoicing
+class BillingProject(BaseModel, TimestampMixin):
     tenant_id = models.CharField(max_length=256)
 
 
-class Invoice(models.Model):
+class Invoice(BaseModel, TimestampMixin):
     class InvoiceState(models.IntegerChoices):
         IN_PROGRESS = 1
         FINISHED = 100
@@ -39,122 +71,111 @@ class Invoice(models.Model):
     state = models.IntegerField(choices=InvoiceState.choices)
     tax = MoneyField(max_digits=10, decimal_places=0, default=None, blank=True, null=True)
     total = MoneyField(max_digits=10, decimal_places=0, default=None, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
 
     @property
     def subtotal(self):
-        # Need to optimize? currently price is calculated on the fly, maybe need to save to db to make performance faster?
-        instance_price = sum(map(lambda x: x.price_charged, self.instances.all()))
-        fip_price = sum(map(lambda x: x.price_charged, self.floating_ips.all()))
-        volume_price = sum(map(lambda x: x.price_charged, self.volumes.all()))
-        price = instance_price + fip_price + volume_price
+        # Need to optimize?
+        # currently price is calculated on the fly, maybe need to save to db to make performance faster?
+        # or using cache?
+
+        price = 0
+        for component_relation_label in labels.INVOICE_COMPONENT_LABELS:
+            relation_all_row = getattr(self, component_relation_label).all()
+            price += sum(map(lambda x: x.price_charged, relation_all_row))
+
         if price == 0:
             return Money(amount=price, currency=settings.DEFAULT_CURRENCY)
 
-        return instance_price + fip_price + volume_price
+        return price
+
+    def close(self, date, tax_percentage):
+        self.state = Invoice.InvoiceState.FINISHED
+        self.end_date = date
+        self.tax = tax_percentage * self.subtotal
+        self.total = self.tax + self.subtotal
+        self.save()
 
 
-class InvoiceInstance(models.Model):
-    invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE, related_name='instances')
+# end region
+
+# region Invoice Component
+class InvoiceInstance(BaseModel, InvoiceComponentMixin):
+    invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE, related_name=labels.LABEL_INSTANCES)
+    # Key
     instance_id = models.CharField(max_length=266)
-    name = models.CharField(max_length=256)
+
+    # Price Dependency
     flavor_id = models.CharField(max_length=256)
-    current_state = models.CharField(max_length=256)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField(default=None, blank=True, null=True)
-    daily_price = MoneyField(max_digits=10, decimal_places=0)
-    monthly_price = MoneyField(max_digits=10, decimal_places=0)
-    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
 
-    @property
-    def adjusted_end_date(self):
-        current_date = timezone.now()
-        if self.end_date:
-            end_date = self.end_date
-        else:
-            end_date = current_date
-
-        return end_date
-
-    @property
-    def price_charged(self):
-        # 1. Belum 1 hari -> Kehitung 1 hari
-        # 2. Perhitungan bulanan
-        # 3. 1 Bulan 15 hari gimana?
-        # TODO: Fix price calculation
-        # Currently only calculate daily price and it can return zero if end date not yet 1 day
-        end_date = self.adjusted_end_date
-        end_date += timedelta(days=1)
-
-        days = (end_date - self.start_date).days
-        return self.daily_price * days
+    # Informative
+    name = models.CharField(max_length=256)
 
 
-class InvoiceFloatingIp(models.Model):
-    invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE, related_name='floating_ips')
+class InvoiceFloatingIp(BaseModel, InvoiceComponentMixin):
+    invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE, related_name=labels.LABEL_FLOATING_IPS)
+    # Key
     fip_id = models.CharField(max_length=266)
+
+    # Informative
     ip = models.CharField(max_length=256)
-    current_state = models.CharField(max_length=256)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField(default=None, blank=True, null=True)
-    daily_price = MoneyField(max_digits=10, decimal_places=0)
-    monthly_price = MoneyField(max_digits=10, decimal_places=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    @property
-    def adjusted_end_date(self):
-        current_date = timezone.now()
-        if self.end_date:
-            end_date = self.end_date
-        else:
-            end_date = current_date
-
-        return end_date
-
-    @property
-    def price_charged(self):
-        # TODO: Fix price calculation
-        # Currently only calculate daily price and it can return zero if end date not yet 1 day
-        end_date = self.adjusted_end_date
-        end_date += timedelta(days=1)
-
-        days = (end_date - self.start_date).days
-        return self.daily_price * days
 
 
-class InvoiceVolume(models.Model):
-    invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE, related_name='volumes')
+class InvoiceVolume(BaseModel, InvoiceComponentMixin):
+    invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE, related_name=labels.LABEL_VOLUMES)
+    # Key
     volume_id = models.CharField(max_length=256)
-    volume_name = models.CharField(max_length=256)
+
+    # Price Dependency
     volume_type_id = models.CharField(max_length=256)
-    space_allocation_gb = models.IntegerField()
-    current_state = models.CharField(max_length=256)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField(default=None, blank=True, null=True)
-    daily_price = MoneyField(max_digits=10, decimal_places=0)
-    monthly_price = MoneyField(max_digits=10, decimal_places=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    space_allocation_gb = models.FloatField()
 
-    @property
-    def adjusted_end_date(self):
-        current_date = timezone.now()
-        if self.end_date:
-            end_date = self.end_date
-        else:
-            end_date = current_date
-
-        return end_date
+    # Informative
+    volume_name = models.CharField(max_length=256)
 
     @property
     def price_charged(self):
-        # TODO: Fix price calculation
-        # Currently only calculate daily price and it can return zero if end date not yet 1 day
-        end_date = self.adjusted_end_date
-        end_date += timedelta(days=1)
+        price_without_allocation = super().price_charged
+        return price_without_allocation * math.ceil(self.space_allocation_gb)
 
-        days = (end_date - self.start_date).days
-        return self.daily_price * self.space_allocation_gb * days
+
+class InvoiceRouter(BaseModel, InvoiceComponentMixin):
+    invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE, related_name=labels.LABEL_ROUTERS)
+    # Key
+    router_id = models.CharField(max_length=256)
+
+    # Informative
+    name = models.CharField(max_length=256)
+
+
+class InvoiceSnapshot(BaseModel, InvoiceComponentMixin):
+    invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE, related_name=labels.LABEL_SNAPSHOTS)
+    # Key
+    snapshot_id = models.CharField(max_length=256)
+
+    # Price Dependency
+    space_allocation_gb = models.FloatField()
+
+    # Informative
+    name = models.CharField(max_length=256)
+
+    @property
+    def price_charged(self):
+        price_without_allocation = super().price_charged
+        return price_without_allocation * math.ceil(self.space_allocation_gb)
+
+class InvoiceImage(BaseModel, InvoiceComponentMixin):
+    invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE, related_name=labels.LABEL_IMAGES)
+    # Key
+    image_id = models.CharField(max_length=256)
+
+    # Price Dependency
+    space_allocation_gb = models.FloatField()
+
+    # Informative
+    name = models.CharField(max_length=256)
+    #
+    # @property
+    # def price_charged(self):
+    #     price_without_allocation = super().price_charged
+    #     return price_without_allocation * math.ceil(self.space_allocation_gb)
+# end region

@@ -10,7 +10,7 @@ from oslo_messaging import notify  # noqa
 
 from django.core.management.base import BaseCommand
 
-from core.notification_endpoint import NotifyEndpoint
+from core.event_endpoint import EventEndpoint
 
 LOG = logging.getLogger("rintik_notification")
 
@@ -42,7 +42,7 @@ class Command(BaseCommand):
             transport.cleanup()
 
     def notify_server(self, transport, topics):
-        endpoints = [NotifyEndpoint()]
+        endpoints = [EventEndpoint()]
         targets = list(map(lambda t: messaging.Target(topic=t), topics))
         server = notify.get_notification_listener(
             transport,

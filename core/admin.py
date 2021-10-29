@@ -1,22 +1,27 @@
 from django.contrib import admin
 
 from core.models import FlavorPrice, VolumePrice, FloatingIpsPrice, BillingProject, Invoice, InvoiceVolume, \
-    InvoiceFloatingIp, InvoiceInstance
+    InvoiceFloatingIp, InvoiceInstance, DynamicSetting
+
+
+@admin.register(DynamicSetting)
+class FlavorPriceAdmin(admin.ModelAdmin):
+    list_display = ('key', 'value', 'type')
 
 
 @admin.register(FlavorPrice)
 class FlavorPriceAdmin(admin.ModelAdmin):
-    list_display = ('flavor_id', 'daily_price', 'monthly_price')
+    list_display = ('flavor_id', 'hourly_price', 'monthly_price')
 
 
 @admin.register(FloatingIpsPrice)
 class FloatingIpsPriceAdmin(admin.ModelAdmin):
-    list_display = ('daily_price', 'monthly_price')
+    list_display = ('hourly_price', 'monthly_price')
 
 
 @admin.register(VolumePrice)
 class VolumePriceAdmin(admin.ModelAdmin):
-    list_display = ('volume_type_id', 'daily_price', 'monthly_price')
+    list_display = ('volume_type_id', 'hourly_price', 'monthly_price')
 
 
 @admin.register(BillingProject)
@@ -26,7 +31,7 @@ class BillingProjectAdmin(admin.ModelAdmin):
 
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
-    list_display = ('__str__',)
+    list_display = ('__str__', 'project',)
 
 
 @admin.register(InvoiceInstance)

@@ -2,11 +2,13 @@ from django.urls import path, include
 from rest_framework import routers
 
 from api import views
+from core.component import component
 
 router = routers.DefaultRouter()
-router.register(r'flavor_price', views.FlavorPriceViewSet)
-router.register(r'floating_ips_price', views.FloatingIpsPriceViewSet)
-router.register(r'volume_price', views.VolumePriceViewSet)
+for name, model in component.PRICE_MODEL.items():
+    router.register(f"price/{name}", views.get_generic_model_view_set(model))
+
+router.register(r'settings', views.DynamicSettingViewSet, basename='settings')
 router.register(r'invoice', views.InvoiceViewSet, basename='invoice')
 
 urlpatterns = [

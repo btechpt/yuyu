@@ -45,4 +45,4 @@ class InvoiceSerializer(serializers.ModelSerializer):
 class SimpleInvoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invoice
-        fields = ['id', 'start_date', 'end_date', 'state']
+        fields = ['id', 'start_date', 'end_date', 'state', 'tax', 'total']

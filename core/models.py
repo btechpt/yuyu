@@ -88,6 +88,14 @@ class Invoice(BaseModel, TimestampMixin):
 
         return price
 
+    @property
+    def total_resource(self):
+        total = 0
+        for component_relation_label in labels.INVOICE_COMPONENT_LABELS:
+            total += getattr(self, component_relation_label).count()
+
+        return total
+
     def close(self, date, tax_percentage):
         self.state = Invoice.InvoiceState.FINISHED
         self.end_date = date

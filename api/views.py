@@ -7,8 +7,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from api.serializers import InvoiceSerializer, SimpleInvoiceSerializer
-from core.models import Invoice, BillingProject
 from core.component import component
+from core.component.component import INVOICE_COMPONENT_MODEL
+from core.models import Invoice, BillingProject
 from core.utils.dynamic_setting import get_dynamic_settings, get_dynamic_setting, set_dynamic_setting, BILLING_ENABLED
 
 
@@ -117,3 +118,134 @@ class InvoiceViewSet(viewsets.ModelViewSet):
                 # create not accepting tenant_id, delete it
                 del payload['tenant_id']
                 handler.create(payload)
+
+
+class AdminOverviewViewSet(viewsets.ViewSet):
+    def list(self, request):
+        return Response({})
+
+    @action(detail=False, methods=['GET'])
+    def total_resource(self, request):
+        data = {
+            'label': [],
+            'data': [],
+        }
+        for k, v in INVOICE_COMPONENT_MODEL.items():
+            data['label'].append(k)
+            data['data'].append(v.objects.filter(invoice__state=Invoice.InvoiceState.IN_PROGRESS).count())
+
+        return Response(data)
+
+    @action(detail=False, methods=['GET'])
+    def active_resource(self, request):
+        data = {
+            'label': [],
+            'data': [],
+        }
+        for k, v in INVOICE_COMPONENT_MODEL.items():
+            data['label'].append(k)
+            data['data'].append(
+                v.objects.filter(invoice__state=Invoice.InvoiceState.IN_PROGRESS, end_date=None).count())
+
+        return Response(data)
+
+    @action(detail=False, methods=['GET'])
+    def price_total_resource(self, request):
+        data = {
+            'label': [],
+            'data': [],
+        }
+        for k, v in INVOICE_COMPONENT_MODEL.items():
+            sum_of_price = sum([q.price_charged.amount for q in
+                                v.objects.filter(invoice__state=Invoice.InvoiceState.IN_PROGRESS).all()])
+
+            data['label'].append(k)
+            data['data'].append(sum_of_price)
+
+        return Response(data)
+
+    @action(detail=False, methods=['GET'])
+    def price_active_resource(self, request):
+        data = {
+            'label': [],
+            'data': [],
+        }
+        for k, v in INVOICE_COMPONENT_MODEL.items():
+            sum_of_price = sum([q.price_charged.amount for q in
+                                v.objects.filter(invoice__state=Invoice.InvoiceState.IN_PROGRESS, end_date=None).all()])
+
+            data['label'].append(k)
+            data['data'].append(sum_of_price)
+
+        return Response(data)
+
+class ProjectOverviewViewSet(viewsets.ViewSet):
+    def list(self, request):
+        return Response({})
+
+    @action(detail=False, methods=['GET'])
+    def total_resource(self, request):
+        tenant_id = self.request.query_params.get('tenant_id', None)
+        project = BillingProject.objects.filter(tenant_id=tenant_id)
+        data = {
+            'label': [],
+            'data': [],
+        }
+        for k, v in INVOICE_COMPONENT_MODEL.items():
+            data['label'].append(k)
+            data['data'].append(
+                v.objects.filter(invoice__project=project, invoice__state=Invoice.InvoiceState.IN_PROGRESS).count())
+
+        return Response(data)
+
+    @action(detail=False, methods=['GET'])
+    def active_resource(self, request):
+        tenant_id = self.request.query_params.get('tenant_id', None)
+        project = BillingProject.objects.filter(tenant_id=tenant_id)
+        data = {
+            'label': [],
+            'data': [],
+        }
+        for k, v in INVOICE_COMPONENT_MODEL.items():
+            data['label'].append(k)
+            data['data'].append(
+                v.objects.filter(invoice__project=project, invoice__state=Invoice.InvoiceState.IN_PROGRESS,
+                                 end_date=None).count())
+
+        return Response(data)
+
+    @action(detail=False, methods=['GET'])
+    def price_total_resource(self, request):
+        tenant_id = self.request.query_params.get('tenant_id', None)
+        project = BillingProject.objects.filter(tenant_id=tenant_id)
+        data = {
+            'label': [],
+            'data': [],
+        }
+        for k, v in INVOICE_COMPONENT_MODEL.items():
+            sum_of_price = sum([q.price_charged.amount for q in
+                                v.objects.filter(invoice__project=project,
+                                                 invoice__state=Invoice.InvoiceState.IN_PROGRESS).all()])
+
+            data['label'].append(k)
+            data['data'].append(sum_of_price)
+
+        return Response(data)
+
+    @action(detail=False, methods=['GET'])
+    def price_active_resource(self, request):
+        tenant_id = self.request.query_params.get('tenant_id', None)
+        project = BillingProject.objects.filter(tenant_id=tenant_id)
+        data = {
+            'label': [],
+            'data': [],
+        }
+        for k, v in INVOICE_COMPONENT_MODEL.items():
+            sum_of_price = sum([q.price_charged.amount for q in
+                                v.objects.filter(invoice__project=project,
+                                                 invoice__state=Invoice.InvoiceState.IN_PROGRESS, end_date=None).all()])
+
+            data['label'].append(k)
+            data['data'].append(sum_of_price)
+
+        return Response(data)

@@ -119,6 +119,24 @@ class InvoiceViewSet(viewsets.ModelViewSet):
                 del payload['tenant_id']
                 handler.create(payload)
 
+    @action(detail=True)
+    def finish(self, request, pk):
+        invoice = Invoice.objects.filter(id=pk).first()
+        if invoice.state == Invoice.InvoiceState.UNPAID:
+            invoice.finish()
+
+        serializer = InvoiceSerializer(invoice)
+        return Response(serializer.data)
+
+    @action(detail=True)
+    def rollback_to_unpaid(self, request, pk):
+        invoice = Invoice.objects.filter(id=pk).first()
+        if invoice.state == Invoice.InvoiceState.FINISHED:
+            invoice.rollback_to_unpaid()
+
+        serializer = InvoiceSerializer(invoice)
+        return Response(serializer.data)
+
 
 class AdminOverviewViewSet(viewsets.ViewSet):
     def list(self, request):
@@ -178,6 +196,7 @@ class AdminOverviewViewSet(viewsets.ViewSet):
             data['data'].append(sum_of_price)
 
         return Response(data)
+
 
 class ProjectOverviewViewSet(viewsets.ViewSet):
     def list(self, request):

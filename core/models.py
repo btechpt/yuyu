@@ -2,6 +2,7 @@ import math
 
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 
@@ -63,11 +64,13 @@ class BillingProject(BaseModel, TimestampMixin):
 class Invoice(BaseModel, TimestampMixin):
     class InvoiceState(models.IntegerChoices):
         IN_PROGRESS = 1
+        UNPAID = 2
         FINISHED = 100
 
     project = models.ForeignKey('BillingProject', on_delete=models.CASCADE)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField(default=None, blank=True, null=True)
+    finish_date = models.DateTimeField(default=None, blank=True, null=True)
     state = models.IntegerField(choices=InvoiceState.choices)
     tax = MoneyField(max_digits=10, decimal_places=0, default=None, blank=True, null=True)
     total = MoneyField(max_digits=10, decimal_places=0, default=None, blank=True, null=True)
@@ -97,10 +100,20 @@ class Invoice(BaseModel, TimestampMixin):
         return total
 
     def close(self, date, tax_percentage):
-        self.state = Invoice.InvoiceState.FINISHED
+        self.state = Invoice.InvoiceState.UNPAID
         self.end_date = date
         self.tax = tax_percentage * self.subtotal
         self.total = self.tax + self.subtotal
+        self.save()
+
+    def finish(self):
+        self.state = Invoice.InvoiceState.FINISHED
+        self.finish_date = timezone.now()
+        self.save()
+
+    def rollback_to_unpaid(self):
+        self.state = Invoice.InvoiceState.UNPAID
+        self.finish_date = None
         self.save()
 
 
@@ -170,6 +183,7 @@ class InvoiceSnapshot(BaseModel, InvoiceComponentMixin):
     def price_charged(self):
         price_without_allocation = super().price_charged
         return price_without_allocation * math.ceil(self.space_allocation_gb)
+
 
 class InvoiceImage(BaseModel, InvoiceComponentMixin):
     invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE, related_name=labels.LABEL_IMAGES)

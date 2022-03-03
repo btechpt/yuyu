@@ -8,3 +8,4 @@ openstacksdk==0.58.0
 djangorestframework==3.12.4
 django-filter==2.4.0
 Markdown==3.3.4
+gunicorn==20.1.0

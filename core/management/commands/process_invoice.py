@@ -15,6 +15,7 @@ class Command(BaseCommand):
     help = 'Rintik New Invoice'
 
     def handle(self, *args, **options):
+        print("Processing Invoice")
         if not get_dynamic_setting(BILLING_ENABLED):
             return
 
@@ -24,6 +25,7 @@ class Command(BaseCommand):
         active_invoices = Invoice.objects.filter(state=Invoice.InvoiceState.IN_PROGRESS).all()
         for active_invoice in active_invoices:
             self.close_active_invoice(active_invoice)
+        print("Processing Done")
 
     def close_active_invoice(self, active_invoice: Invoice):
         active_components_map: Dict[str, Iterable[InvoiceComponentMixin]] = {}

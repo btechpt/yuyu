@@ -1,0 +1,7 @@
+RINTIK_NOTIFICATION_URL = "rabbit://openstack:password@127.0.0.1:5672/"
+RINTIK_NOTIFICATION_TOPICS = ["notifications"]
+
+# Currency Configuration
+CURRENCIES = ('IDR', 'USD')
+DEFAULT_CURRENCY = "IDR"
+

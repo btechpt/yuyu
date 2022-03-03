@@ -1,0 +1,12 @@
+[Unit]
+Description=rintik event monitor daemon
+After=network.target
+
+[Service]
+User=root
+Group=root
+WorkingDirectory={{rintik_dir}}
+ExecStart={{rintik_dir}}/env/bin/python manage.py event_monitor
+
+[Install]
+WantedBy=multi-user.target

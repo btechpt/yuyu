@@ -29,9 +29,9 @@ pip3 install virtualenv
 
 ### Openstack Service Notification
 You need to enable notification for this openstack service:
-- Nova
-- Cinder
-- Neutron
+- Nova (nova.conf)
+- Cinder (cinder.conf)
+- Neutron (neutron.conf)
 
 ### Nova
 Add configuration below on `[oslo_messaging_notifications]`
@@ -41,7 +41,7 @@ driver = messagingv2
 topics = notifications
 ```
 
-Add configuration below on ``
+Add configuration below on `[notifications]`
 
 ``
 notify_on_state_change = vm_and_task_state

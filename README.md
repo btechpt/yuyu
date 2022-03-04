@@ -1,4 +1,3 @@
-
 # Rintik
 
 Rintik provide ability to manage openstack billing by listening to every openstack event. Rintik is a required component to use Rintik Dashboard. There are 3 main component in Rintik: API, Cron, Event Monitor 
@@ -43,10 +42,10 @@ topics = notifications
 
 Add configuration below on `[notifications]`
 
-``
+```
 notify_on_state_change = vm_and_task_state
 notification_format = unversioned
-``
+```
 
 ### Cinder & Neutron
 

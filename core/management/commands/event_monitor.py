@@ -12,7 +12,7 @@ from django.core.management.base import BaseCommand
 
 from core.event_endpoint import EventEndpoint
 
-LOG = logging.getLogger("rintik_notification")
+LOG = logging.getLogger("yuyu_notification")
 
 
 class SignalExit(SystemExit):
@@ -22,7 +22,7 @@ class SignalExit(SystemExit):
 
 
 class Command(BaseCommand):
-    help = 'Start Rintik Event Monitor'
+    help = 'Start Yuyu Event Monitor'
 
     def signal_handler(self, signum, frame):
         raise SignalExit(signum)
@@ -53,19 +53,19 @@ class Command(BaseCommand):
         self.run_server(transport, server)
 
     def handle(self, *args, **options):
-        url = settings.RINTIK_NOTIFICATION_URL
+        url = settings.YUYU_NOTIFICATION_URL
         transport = messaging.get_notification_transport(cfg.CONF,
                                                          url=url)
 
         # oslo.config defaults
         cfg.CONF.heartbeat_interval = 5
         cfg.CONF.prog = os.path.basename(__file__)
-        cfg.CONF.project = 'rintik'
+        cfg.CONF.project = 'yuyu'
 
         signal.signal(signal.SIGTERM, self.signal_handler)
         signal.signal(signal.SIGINT, self.signal_handler)
 
         self.notify_server(
             transport=transport,
-            topics=settings.RINTIK_NOTIFICATION_TOPICS,
+            topics=settings.YUYU_NOTIFICATION_TOPICS,
         )

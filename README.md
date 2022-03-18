@@ -1,15 +1,15 @@
 
-# Rintik
+# Yuyu
 
-Rintik provide ability to manage openstack billing by listening to every openstack event. Rintik is a required component to use Rintik Dashboard. There are 3 main component in Rintik: API, Cron, Event Monitor 
+Yuyu provide ability to manage openstack billing by listening to every openstack event. Yuyu is a required component to use Yuyu Dashboard. There are 3 main component in Yuyu: API, Cron, Event Monitor 
 
-## Rintik API
-Main component to communicate with Rintik Dashboard.
+## Yuyu API
+Main component to communicate with Yuyu Dashboard.
 
-## Rintik Cron
+## Yuyu Cron
 Provide invoice calculation and rolling capabilities that needed to run every month.
 
-## Rintik Event Monitor
+## Yuyu Event Monitor
 Monitor event from openstack to calculate billing spent.
 
 # System Requirement
@@ -21,7 +21,7 @@ Monitor event from openstack to calculate billing spent.
 # Pre-Installation
 
 ### Virtualenv
-Make sure you installed virtualenv before installing Rintik
+Make sure you installed virtualenv before installing Yuyu
 
 ```bash
 pip3 install virtualenv
@@ -62,12 +62,12 @@ If you using Kolla, please add configuration above on all service container. For
 
 # Installation
 
-Clone the latest source code and put it on any directory you want. Here i assume you put it on `/var/rintik/`
+Clone the latest source code and put it on any directory you want. Here i assume you put it on `/var/yuyu/`
 
 ```bash
-cd /var/rintik/
+cd /var/yuyu/
 git clone {repository}
-cd rintik
+cd yuyu
 ```
 
 Then create virtualenv and activate it
@@ -80,7 +80,7 @@ pip install -r requirements.txt
 Then create a configuration file, just copy from sample file and modify as your preference.
 
 ```bash
-cp core/local_settings.py.sample core/local_settings.py
+cp yuyu/local_settings.py.sample yuyu/local_settings.py
 ```
 
 Please read [Local Setting Configuration](#local-setting-configuration) to get to know about what configuration you should change.
@@ -99,20 +99,20 @@ python manage.py createsuperuser
 
 ## Local Setting Configuration
 
-### RINTIK_NOTIFICATION_URL (required)
+### YUYU_NOTIFICATION_URL (required)
 A Messaging Queue URL that used by Openstack, usually it is a RabbitMQ URL.
 
 Example: 
 ```
-RINTIK_NOTIFICATION_URL = "rabbit://openstack:password@127.0.0.1:5672/"
+YUYU_NOTIFICATION_URL = "rabbit://openstack:password@127.0.0.1:5672/"
 ```
 
-### RINTIK_NOTIFICATION_TOPICS (required)
+### YUYU_NOTIFICATION_TOPICS (required)
 A list of topic notification topic that is configured on each openstack service
 
 Example: 
 ```
-RINTIK_NOTIFICATION_TOPICS = ["notifications"]
+YUYU_NOTIFICATION_TOPICS = ["notifications"]
 ```
 
 
@@ -124,37 +124,37 @@ By default, it will use Sqlite. If you want to change it to other database pleas
 
 ## API Installation
 
-To install Rintik API, you need to execute this command.
+To install Yuyu API, you need to execute this command.
 
 ```bash
 ./bin/setup_api.sh
 ```
 
-This will install `rintik_api` service
+This will install `yuyu_api` service
 
 To start the service use this command
 ```bash
-systemctl enable rintik_api
-systemctl start rintik_api
+systemctl enable yuyu_api
+systemctl start yuyu_api
 ```
 
 An API server will be open on port `8182`. 
 
 ## Event Monitor Installation
 
-To install Rintik API, you need to execute this command.
+To install Yuyu API, you need to execute this command.
 
 ```bash
 ./bin/setup_event_montor.sh
 ```
 
 
-This will install `rintik_event_monitor` service
+This will install `yuyu_event_monitor` service
 
 To start the service use this command
 ```bash
-systemctl enable rintik_event_monitor
-systemctl start rintik_event_monitor
+systemctl enable yuyu_event_monitor
+systemctl start yuyu_event_monitor
 ```
 
 ## Cron Installation
@@ -166,10 +166,10 @@ To install it, you can use `crontab -e`.
 Put this expression on the crontab
 
 ```
-1 0 1 * * $rintik_dir/bin/process_invoice.sh 
+1 0 1 * * $yuyu_dir/bin/process_invoice.sh 
 ```
 
-Replace $rintik_dir with the directory of where rintik is located. Example
+Replace $yuyu_dir with the directory of where yuyu is located. Example
 ```
-1 0 1 * * /etc/rintik/bin/process_invoice.sh
+1 0 1 * * /etc/yuyu/bin/process_invoice.sh
 ```

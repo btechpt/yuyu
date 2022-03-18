@@ -5,7 +5,7 @@ from oslo_messaging import NotificationResult
 from core.component import component
 from core.utils.dynamic_setting import get_dynamic_settings, BILLING_ENABLED, get_dynamic_setting
 
-LOG = logging.getLogger("rintik_notification")
+LOG = logging.getLogger("yuyu_notification")
 
 
 class EventEndpoint(object):

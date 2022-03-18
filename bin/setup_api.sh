@@ -1,12 +1,16 @@
 #!/bin/bash
 
-echo "Installing Rintik API Service"
-rintik_dir=`pwd -P`
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR || exit
+cd ..
 
-echo "Riktik dir is $rintik_dir"
+echo "Installing Yuyu API Service"
+yuyu_dir=`pwd -P`
 
-rintik_dir_sub=${rintik_dir//\//\\\/}
-sed "s/{{rintik_dir}}/$rintik_dir_sub/g" "$rintik_dir"/script/rintik_api.service > /etc/systemd/system/rintik_api.service
+echo "Yuyu dir is $yuyu_dir"
 
-echo "Rintik API Service Installed on /etc/systemd/system/rintik_api.service"
-echo "Done! you can enable Rintik API with systemctl start rintik_api"
+yuyu_dir_sub=${yuyu_dir//\//\\\/}
+sed "s/{{yuyu_dir}}/$yuyu_dir_sub/g" "$yuyu_dir"/script/yuyu_api.service > /etc/systemd/system/yuyu_api.service
+
+echo "Yuyu API Service Installed on /etc/systemd/system/yuyu_api.service"
+echo "Done! you can enable Yuyu API with systemctl start yuyu_api"

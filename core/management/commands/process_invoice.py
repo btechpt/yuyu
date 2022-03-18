@@ -8,11 +8,11 @@ from core.models import Invoice, InvoiceComponentMixin
 from core.component import component, labels
 from core.utils.dynamic_setting import get_dynamic_setting, BILLING_ENABLED, INVOICE_TAX
 
-LOG = logging.getLogger("rintik_new_invoice")
+LOG = logging.getLogger("yuyu_new_invoice")
 
 
 class Command(BaseCommand):
-    help = 'Rintik New Invoice'
+    help = 'Yuyu New Invoice'
 
     def handle(self, *args, **options):
         print("Processing Invoice")

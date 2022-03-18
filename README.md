@@ -1,4 +1,3 @@
-
 # Yuyu
 
 Yuyu provide ability to manage openstack billing by listening to every openstack event. Yuyu is a required component to use Yuyu Dashboard. There are 3 main component in Yuyu: API, Cron, Event Monitor 
@@ -43,10 +42,10 @@ topics = notifications
 
 Add configuration below on `[notifications]`
 
-``
+```
 notify_on_state_change = vm_and_task_state
 notification_format = unversioned
-``
+```
 
 ### Cinder & Neutron
 

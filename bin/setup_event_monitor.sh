@@ -5,13 +5,13 @@ cd $SCRIPT_DIR || exit
 cd ..
 
 
-echo "Installing Rintik API Service"
+echo "Installing Yuyu Event Monitor Service"
 yuyu_dir=`pwd -P`
 
-echo "Riktik dir is $yuyu_dir"
+echo "Yuyu dir is $yuyu_dir"
 
 yuyu_dir_sub=${yuyu_dir//\//\\\/}
 sed "s/{{yuyu_dir}}/$yuyu_dir_sub/g" "$yuyu_dir"/script/yuyu_event_monitor.service > /etc/systemd/system/yuyu_event_monitor.service
 
-echo "Yuyu API Service Installed on /etc/systemd/system/yuyu_event_monitor.service"
-echo "Done! you can enable Rintik API with systemctl start yuyu_event_monitor"
+echo "Yuyu Event Monitor Service Installed on /etc/systemd/system/yuyu_event_monitor.service"
+echo "Done! you can enable Yuyu Event Monitor with systemctl start yuyu_event_monitor"

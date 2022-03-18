@@ -144,7 +144,7 @@ An API server will be open on port `8182`.
 To install Yuyu API, you need to execute this command.
 
 ```bash
-./bin/setup_event_montor.sh
+./bin/setup_event_monitor.sh
 ```
 
 

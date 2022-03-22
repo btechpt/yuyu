@@ -22,7 +22,7 @@ class VolumeEventHandler(EventHandler):
         payload = {
             "volume_id": raw_payload['volume_id'],
             "volume_type_id": raw_payload['volume_type'],
-            "volume_name": raw_payload['display_name'],
+            "volume_name": raw_payload['display_name'] or raw_payload['volume_id'],
             "space_allocation_gb": raw_payload['size'],
         }
 

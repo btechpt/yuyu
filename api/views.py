@@ -205,7 +205,7 @@ class ProjectOverviewViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['GET'])
     def total_resource(self, request):
         tenant_id = self.request.query_params.get('tenant_id', None)
-        project = BillingProject.objects.filter(tenant_id=tenant_id)
+        project = BillingProject.objects.filter(tenant_id=tenant_id).first()
         data = {
             'label': [],
             'data': [],
@@ -220,7 +220,7 @@ class ProjectOverviewViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['GET'])
     def active_resource(self, request):
         tenant_id = self.request.query_params.get('tenant_id', None)
-        project = BillingProject.objects.filter(tenant_id=tenant_id)
+        project = BillingProject.objects.filter(tenant_id=tenant_id).first()
         data = {
             'label': [],
             'data': [],
@@ -236,7 +236,7 @@ class ProjectOverviewViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['GET'])
     def price_total_resource(self, request):
         tenant_id = self.request.query_params.get('tenant_id', None)
-        project = BillingProject.objects.filter(tenant_id=tenant_id)
+        project = BillingProject.objects.filter(tenant_id=tenant_id).first()
         data = {
             'label': [],
             'data': [],
@@ -254,7 +254,7 @@ class ProjectOverviewViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['GET'])
     def price_active_resource(self, request):
         tenant_id = self.request.query_params.get('tenant_id', None)
-        project = BillingProject.objects.filter(tenant_id=tenant_id)
+        project = BillingProject.objects.filter(tenant_id=tenant_id).first()
         data = {
             'label': [],
             'data': [],

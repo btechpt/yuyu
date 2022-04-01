@@ -31,6 +31,8 @@ def generate_invoice_component_serializer(model):
 class InvoiceSerializer(serializers.ModelSerializer):
     subtotal = MoneyField(max_digits=10, decimal_places=0)
     subtotal_currency = serializers.CharField(source="subtotal.currency")
+    total = MoneyField(max_digits=10, decimal_places=0)
+    total_currency = serializers.CharField(source="total.currency", required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -45,7 +47,10 @@ class InvoiceSerializer(serializers.ModelSerializer):
 class SimpleInvoiceSerializer(serializers.ModelSerializer):
     subtotal = MoneyField(max_digits=10, decimal_places=0)
     subtotal_currency = serializers.CharField(source="subtotal.currency")
+    total = MoneyField(max_digits=10, decimal_places=0)
+    total_currency = serializers.CharField(source="total.currency", required=False)
 
     class Meta:
         model = Invoice
-        fields = ['id', 'start_date', 'end_date', 'state', 'tax', 'subtotal', 'subtotal_currency', 'total']
+        fields = ['id', 'start_date', 'end_date', 'state', 'tax', 'subtotal', 'subtotal_currency', 'total',
+                  'total_currency']

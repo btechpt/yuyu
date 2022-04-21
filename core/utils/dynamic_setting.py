@@ -7,7 +7,7 @@ INVOICE_TAX = "invoice_tax"
 
 DEFAULTS = {
     BILLING_ENABLED: False,
-    INVOICE_TAX: 10
+    INVOICE_TAX: 11
 }
 
 

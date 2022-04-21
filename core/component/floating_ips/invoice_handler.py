@@ -1,3 +1,4 @@
+from core.exception import PriceNotFound
 from core.models import FloatingIpsPrice, InvoiceFloatingIp, PriceMixin
 from core.component.base.invoice_handler import InvoiceHandler
 
@@ -9,4 +10,10 @@ class FloatingIpInvoiceHandler(InvoiceHandler):
     INFORMATIVE_FIELDS = ["ip"]
 
     def get_price(self, payload) -> PriceMixin:
-        return FloatingIpsPrice.objects.first()
+        price = FloatingIpsPrice.objects.first()
+
+        if price is None:
+            raise PriceNotFound(identifier='floating ip')
+
+        return price
+

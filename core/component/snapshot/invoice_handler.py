@@ -1,4 +1,5 @@
 from core.component.base.invoice_handler import InvoiceHandler
+from core.exception import PriceNotFound
 from core.models import PriceMixin, InvoiceSnapshot, SnapshotPrice
 
 
@@ -9,4 +10,8 @@ class SnapshotInvoiceHandler(InvoiceHandler):
     INFORMATIVE_FIELDS = ["name"]
 
     def get_price(self, payload) -> PriceMixin:
-        return SnapshotPrice.objects.first()
+        price = SnapshotPrice.objects.first()
+        if price is None:
+            raise PriceNotFound(identifier='snapshot')
+
+        return price

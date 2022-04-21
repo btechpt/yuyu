@@ -1,4 +1,5 @@
 from core.component.base.invoice_handler import InvoiceHandler
+from core.exception import PriceNotFound
 from core.models import PriceMixin, InvoiceImage, ImagePrice
 
 
@@ -9,4 +10,8 @@ class ImageInvoiceHandler(InvoiceHandler):
     INFORMATIVE_FIELDS = ["name"]
 
     def get_price(self, payload) -> PriceMixin:
-        return ImagePrice.objects.first()
+        price = ImagePrice.objects.first()
+        if price is None:
+            raise PriceNotFound(identifier='image')
+
+        return price

@@ -54,4 +54,4 @@ class Command(BaseCommand):
             for active_component in active_components:
                 handler.roll(active_component, self.close_date, update_payload={
                     "invoice": new_invoice
-                })
+                }, fallback_price=True)

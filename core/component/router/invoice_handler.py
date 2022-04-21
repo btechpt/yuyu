@@ -1,4 +1,5 @@
 from core.component.base.invoice_handler import InvoiceHandler
+from core.exception import PriceNotFound
 from core.models import PriceMixin, InvoiceRouter, RouterPrice
 
 
@@ -9,4 +10,8 @@ class RouterInvoiceHandler(InvoiceHandler):
     INFORMATIVE_FIELDS = ["name"]
 
     def get_price(self, payload) -> PriceMixin:
-        return RouterPrice.objects.first()
+        price = RouterPrice.objects.first()
+        if price is None:
+            raise PriceNotFound(identifier='router')
+
+        return price

@@ -70,7 +70,7 @@ class EventHandler(metaclass=abc.ABCMeta):
             payload['invoice'] = invoice
             payload['start_date'] = timezone.now()
 
-            self.invoice_handler.create(payload)
+            self.invoice_handler.create(payload, fallback_price=True)
 
             return True
 
@@ -113,7 +113,7 @@ class EventHandler(metaclass=abc.ABCMeta):
 
         if instance:
             if self.invoice_handler.is_price_dependency_changed(instance, payload):
-                self.invoice_handler.roll(instance, close_date=timezone.now(), update_payload=payload)
+                self.invoice_handler.roll(instance, close_date=timezone.now(), update_payload=payload, fallback_price=True)
                 return True
 
             if self.invoice_handler.is_informative_changed(instance, payload):

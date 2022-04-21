@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from api.serializers import InvoiceSerializer, SimpleInvoiceSerializer
 from core.component import component
 from core.component.component import INVOICE_COMPONENT_MODEL
+from core.exception import PriceNotFound
 from core.models import Invoice, BillingProject
 from core.utils.dynamic_setting import get_dynamic_settings, get_dynamic_setting, set_dynamic_setting, BILLING_ENABLED
 
@@ -74,9 +75,26 @@ class InvoiceViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'])
     def enable_billing(self, request):
-        # TODO: Handle unknown price
-        self.handle_init_billing(request.data)
+        try:
+            self.handle_init_billing(request.data)
+            return Response({
+                "status": "success"
+            })
+        except PriceNotFound as e:
+            return Response({
+                "message": str(e.identifier) + " price not found. Please check price configuration"
+            }, status=400)
 
+    @action(detail=False, methods=['POST'])
+    def disable_billing(self, request):
+        set_dynamic_setting(BILLING_ENABLED, False)
+        return Response({
+            "status": "success"
+        })
+
+    @action(detail=False, methods=['POST'])
+    def reset_billing(self, request):
+        self.handle_reset_billing()
         return Response({
             "status": "success"
         })
@@ -118,6 +136,17 @@ class InvoiceViewSet(viewsets.ModelViewSet):
                 # create not accepting tenant_id, delete it
                 del payload['tenant_id']
                 handler.create(payload)
+
+    @transaction.atomic
+    def handle_reset_billing(self):
+        set_dynamic_setting(BILLING_ENABLED, False)
+
+        BillingProject.objects.all().delete()
+        for name, handler in component.INVOICE_HANDLER.items():
+            handler.delete()
+
+        for name, model in component.PRICE_MODEL.items():
+            model.objects.all().delete()
 
     @action(detail=True)
     def finish(self, request, pk):

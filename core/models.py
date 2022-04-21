@@ -60,6 +60,9 @@ class ImagePrice(BaseModel, TimestampMixin, PriceMixin):
 class BillingProject(BaseModel, TimestampMixin):
     tenant_id = models.CharField(max_length=256)
 
+    def __str__(self):
+        return self.tenant_id
+
 
 class Invoice(BaseModel, TimestampMixin):
     class InvoiceState(models.IntegerChoices):
@@ -102,7 +105,7 @@ class Invoice(BaseModel, TimestampMixin):
     def close(self, date, tax_percentage):
         self.state = Invoice.InvoiceState.UNPAID
         self.end_date = date
-        self.tax = tax_percentage * self.subtotal
+        self.tax = tax_percentage * self.subtotal / 100
         self.total = self.tax + self.subtotal
         self.save()
 

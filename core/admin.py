@@ -46,7 +46,7 @@ class BillingProjectAdmin(admin.ModelAdmin):
 
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'project',)
+    list_display = ('__str__', 'project', 'start_date')
 
 
 @admin.register(InvoiceInstance)

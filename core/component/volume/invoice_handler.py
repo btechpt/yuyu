@@ -1,3 +1,4 @@
+from core.exception import PriceNotFound
 from core.models import VolumePrice, InvoiceVolume, PriceMixin
 from core.component.base.invoice_handler import InvoiceHandler
 
@@ -9,4 +10,9 @@ class VolumeInvoiceHandler(InvoiceHandler):
     INFORMATIVE_FIELDS = ['volume_name']
 
     def get_price(self, payload) -> PriceMixin:
-        return VolumePrice.objects.filter(volume_type_id=payload['volume_type_id']).first()
+        price = VolumePrice.objects.filter(volume_type_id=payload['volume_type_id']).first()
+
+        if price is None:
+            raise PriceNotFound(identifier='volume')
+
+        return price

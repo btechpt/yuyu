@@ -1,7 +1,10 @@
 import abc
 
+from django.conf import settings
 from django.utils import timezone
+from djmoney.money import Money
 
+from core.exception import PriceNotFound
 from core.models import InvoiceComponentMixin, PriceMixin
 
 
@@ -11,25 +14,41 @@ class InvoiceHandler(metaclass=abc.ABCMeta):
     INFORMATIVE_FIELDS = []
     PRICE_DEPENDENCY_FIELDS = []
 
-    def create(self, payload):
+    def create(self, payload, fallback_price=False):
         """
         Create new invoice component
         :param payload: the data that will be created
+        :param fallback_price: Whether use 0 price if price not found
         :return:
         """
-        price = self.get_price(payload)
+        try:
+            price = self.get_price(payload)
+            if price is None:
+                raise PriceNotFound()
+        except PriceNotFound:
+            if fallback_price:
+                price = PriceMixin()
+                price.hourly_price = Money(amount=0, currency=settings.DEFAULT_CURRENCY)
+                price.monthly_price = Money(amount=0, currency=settings.DEFAULT_CURRENCY)
+            else:
+                raise
+
         payload['hourly_price'] = price.hourly_price
         payload['monthly_price'] = price.monthly_price
 
         self.INVOICE_CLASS.objects.create(**payload)
 
-    def roll(self, instance: InvoiceComponentMixin, close_date, update_payload=None):
+    def delete(self):
+        self.INVOICE_CLASS.objects.all().delete()
+
+    def roll(self, instance: InvoiceComponentMixin, close_date, update_payload=None, fallback_price=False):
         """
         Roll current instance.
         Close current component instance and clone it
         :param instance: The instance that want to be rolled
         :param close_date: The close date of current instance
         :param update_payload: New data to update the next component instance
+        :param fallback_price: Whether use 0 price if price not found
         :return:
         """
         if update_payload is None:
@@ -51,7 +70,17 @@ class InvoiceHandler(metaclass=abc.ABCMeta):
         instance = self.update(instance, update_payload, save=False)
 
         # Update the price
-        price = self.get_price(self.get_price_dependency_from_instance(instance))
+        try:
+            price = self.get_price(self.get_price_dependency_from_instance(instance))
+            if price is None:
+                raise PriceNotFound()
+        except PriceNotFound:
+            if fallback_price:
+                price = PriceMixin()
+                price.hourly_price = Money(amount=0, currency=settings.DEFAULT_CURRENCY)
+                price.monthly_price = Money(amount=0, currency=settings.DEFAULT_CURRENCY)
+            else:
+                raise
         instance.hourly_price = price.hourly_price
         instance.monthly_price = price.monthly_price
         instance.save()

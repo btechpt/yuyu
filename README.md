@@ -170,5 +170,5 @@ Put this expression on the crontab
 
 Replace $yuyu_dir with the directory of where yuyu is located. Example
 ```
-1 0 1 * * /etc/yuyu/bin/process_invoice.sh
+1 0 1 * * /var/yuyu/bin/process_invoice.sh
 ```

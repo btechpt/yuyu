@@ -26,6 +26,10 @@ Make sure you installed virtualenv before installing Yuyu
 pip3 install virtualenv
 ```
 
+### Timezone
+
+Billing is a time sensitive application, please make sure you set a correct time and timezone on you machine.
+
 ### Openstack Service Notification
 You need to enable notification for this openstack service:
 - Nova (nova.conf)

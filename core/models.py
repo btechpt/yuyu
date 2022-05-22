@@ -27,7 +27,7 @@ class DynamicSetting(BaseModel):
 
 # region Pricing
 class FlavorPrice(BaseModel, TimestampMixin, PriceMixin):
-    flavor_id = models.CharField(max_length=256)
+    flavor_id = models.CharField(max_length=256, unique=True, blank=False)
 
 
 class FloatingIpsPrice(BaseModel, TimestampMixin, PriceMixin):
@@ -36,7 +36,7 @@ class FloatingIpsPrice(BaseModel, TimestampMixin, PriceMixin):
 
 
 class VolumePrice(BaseModel, TimestampMixin, PriceMixin):
-    volume_type_id = models.CharField(max_length=256)
+    volume_type_id = models.CharField(max_length=256, unique=True, blank=False)
 
 
 class RouterPrice(BaseModel, TimestampMixin, PriceMixin):

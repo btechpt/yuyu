@@ -1,3 +1,5 @@
+from typing import Dict, Iterable
+
 import dateutil.parser
 import pytz
 from django.db import transaction
@@ -7,11 +9,13 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from api.serializers import InvoiceSerializer, SimpleInvoiceSerializer
-from core.component import component
+from core.component import component, labels
 from core.component.component import INVOICE_COMPONENT_MODEL
 from core.exception import PriceNotFound
 from core.models import Invoice, BillingProject
-from core.utils.dynamic_setting import get_dynamic_settings, get_dynamic_setting, set_dynamic_setting, BILLING_ENABLED
+from core.utils.dynamic_setting import get_dynamic_settings, get_dynamic_setting, set_dynamic_setting, BILLING_ENABLED, \
+    INVOICE_TAX
+from core.utils.model_utils import InvoiceComponentMixin
 
 
 def get_generic_model_view_set(model):
@@ -88,9 +92,26 @@ class InvoiceViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'])
     def disable_billing(self, request):
         set_dynamic_setting(BILLING_ENABLED, False)
+        active_invoices = Invoice.objects.filter(state=Invoice.InvoiceState.IN_PROGRESS).all()
+        for active_invoice in active_invoices:
+            self._close_active_invoice(active_invoice, timezone.now(), get_dynamic_setting(INVOICE_TAX))
+
         return Response({
             "status": "success"
         })
+
+    def _close_active_invoice(self, active_invoice: Invoice, close_date, tax_percentage):
+        active_components_map: Dict[str, Iterable[InvoiceComponentMixin]] = {}
+
+        for label in labels.INVOICE_COMPONENT_LABELS:
+            active_components_map[label] = getattr(active_invoice, label).filter(end_date=None).all()
+
+            # Close Invoice Component
+            for active_component in active_components_map[label]:
+                active_component.close(close_date)
+
+        # Finish current invoice
+        active_invoice.close(close_date, tax_percentage)
 
     @action(detail=False, methods=['POST'])
     def reset_billing(self, request):
@@ -135,7 +156,7 @@ class InvoiceViewSet(viewsets.ModelViewSet):
 
                 # create not accepting tenant_id, delete it
                 del payload['tenant_id']
-                handler.create(payload)
+                handler.create(payload, fallback_price=True)
 
     @transaction.atomic
     def handle_reset_billing(self):

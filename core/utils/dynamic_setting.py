@@ -4,10 +4,20 @@ from core.models import DynamicSetting
 
 BILLING_ENABLED = "billing_enabled"
 INVOICE_TAX = "invoice_tax"
+COMPANY_NAME = "company_name"
+COMPANY_LOGO = "company_logo"
+COMPANY_ADDRESS = "company_address"
+EMAIL_ADMIN = "email_admin"
+EMAIL_NOTIFICATION = "email_notification"
 
 DEFAULTS = {
     BILLING_ENABLED: False,
-    INVOICE_TAX: 11
+    INVOICE_TAX: 11,
+    COMPANY_NAME: "BTECH DEV",
+    COMPANY_LOGO: '',
+    COMPANY_ADDRESS: '',
+    EMAIL_ADMIN: '',
+    EMAIL_NOTIFICATION: '',
 }
 
 
@@ -55,6 +65,7 @@ def set_dynamic_setting(key, value):
         inserted_value = value
         data_type = DynamicSetting.DataType.STR
     else:
+        print("SETTING TAB = ", type(value))
         raise ValueError("Type not supported")
 
     DynamicSetting.objects.update_or_create(key=key, defaults={

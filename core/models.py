@@ -59,6 +59,7 @@ class ImagePrice(BaseModel, TimestampMixin, PriceMixin):
 # region Invoicing
 class BillingProject(BaseModel, TimestampMixin):
     tenant_id = models.CharField(max_length=256)
+    email_notification = models.EmailField(max_length=256, blank=True, null=True)
 
     def __str__(self):
         return self.tenant_id

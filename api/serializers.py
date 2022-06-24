@@ -60,11 +60,6 @@ class BillingProjectSerializer(serializers.ModelSerializer):
     tenant_id = serializers.CharField(required=False, read_only=True)
     email_notification = serializers.EmailField(required=False)
 
-    def update(self, instance, validated_data):
-        instance.email_notification = validated_data.get('email_notification', instance.email_notification)
-        instance.save()
-        return instance
-
     class Meta:
         model = BillingProject
         fields = ['tenant_id', 'email_notification']

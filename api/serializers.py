@@ -1,7 +1,7 @@
 from djmoney.contrib.django_rest_framework import MoneyField
 from rest_framework import serializers
 
-from core.models import Invoice
+from core.models import Invoice, BillingProject
 from core.component import component
 
 
@@ -54,3 +54,12 @@ class SimpleInvoiceSerializer(serializers.ModelSerializer):
         model = Invoice
         fields = ['id', 'start_date', 'end_date', 'state', 'tax', 'subtotal', 'subtotal_currency', 'total',
                   'total_currency']
+
+
+class BillingProjectSerializer(serializers.ModelSerializer):
+    tenant_id = serializers.CharField(required=False, read_only=True)
+    email_notification = serializers.EmailField(required=False)
+
+    class Meta:
+        model = BillingProject
+        fields = ['tenant_id', 'email_notification']

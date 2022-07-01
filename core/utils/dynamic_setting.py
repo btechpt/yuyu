@@ -8,7 +8,6 @@ COMPANY_NAME = "company_name"
 COMPANY_LOGO = "company_logo"
 COMPANY_ADDRESS = "company_address"
 EMAIL_ADMIN = "email_admin"
-EMAIL_NOTIFICATION = "email_notification"
 
 DEFAULTS = {
     BILLING_ENABLED: False,
@@ -17,7 +16,6 @@ DEFAULTS = {
     COMPANY_LOGO: '',
     COMPANY_ADDRESS: '',
     EMAIL_ADMIN: '',
-    EMAIL_NOTIFICATION: '',
 }
 
 

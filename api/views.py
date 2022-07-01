@@ -8,7 +8,7 @@ from rest_framework import viewsets, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from api.serializers import InvoiceSerializer, SimpleInvoiceSerializer
+from api.serializers import InvoiceSerializer, SimpleInvoiceSerializer, BillingProjectSerializer
 from core.component import component, labels
 from core.component.component import INVOICE_COMPONENT_MODEL
 from core.exception import PriceNotFound
@@ -250,7 +250,28 @@ class AdminOverviewViewSet(viewsets.ViewSet):
 
 class ProjectOverviewViewSet(viewsets.ViewSet):
     def list(self, request):
-        return Response({})
+        project = BillingProject.objects.all()
+        serializer = BillingProjectSerializer(project, many=True)
+
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['GET'])
+    def get_tenant(self, request, pk):
+        project = BillingProject.objects.filter(tenant_id=pk).first()
+        serializer = BillingProjectSerializer(project)
+
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['POST'])
+    def update_email(self, request, pk):
+        project = BillingProject.objects.filter(tenant_id=pk).first()
+        serializer = BillingProjectSerializer(project, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response({
+            "status": "success"
+        })
 
     @action(detail=False, methods=['GET'])
     def total_resource(self, request):

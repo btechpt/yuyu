@@ -201,7 +201,7 @@ class InvoiceViewSet(viewsets.ModelViewSet):
 
         send_notification_from_template(
             project=invoice.project,
-            title=settings.EMAIL_TAG + f' Invoice #{invoice.id} in Unpaid',
+            title=settings.EMAIL_TAG + f' Invoice #{invoice.id} is Unpaid',
             short_description=f'Invoice is Unpaid with total of {invoice.total}',
             template='invoice.html',
             context={
@@ -376,7 +376,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
         tenant_id = self.request.query_params.get('tenant_id', None)
         if tenant_id is None:
             return Notification.objects.order_by('-created_at')
-        if tenant_id == 0:
+        if tenant_id == '0':
             return Notification.objects.filter(project=None).order_by('-created_at')
 
         return Notification.objects.filter(project__tenant_id=tenant_id).order_by('-created_at')

@@ -1,9 +1,12 @@
 import logging
+import traceback
 
 from oslo_messaging import NotificationResult
 
 from core.component import component
+from core.notification import send_notification
 from core.utils.dynamic_setting import get_dynamic_settings, BILLING_ENABLED, get_dynamic_setting
+from yuyu import settings
 
 LOG = logging.getLogger("yuyu_notification")
 
@@ -23,7 +26,14 @@ class EventEndpoint(object):
             return NotificationResult.HANDLED
 
         # TODO: Error Handling
-        for handler in self.event_handler:
-            handler.handle(event_type, payload)
-
+        try:
+            for handler in self.event_handler:
+                handler.handle(event_type, payload)
+        except Exception:
+            send_notification(
+                project=None,
+                title=f'{settings.EMAIL_TAG} [Error] Error when handling OpenStack Notification',
+                short_description=f'There is an error when handling OpenStack Notification',
+                content=f'There is an error when handling OpenStack Notification \n {traceback.format_exc()}',
+            )
         return NotificationResult.HANDLED

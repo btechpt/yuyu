@@ -12,6 +12,7 @@ router.register(r'settings', views.DynamicSettingViewSet, basename='settings')
 router.register(r'invoice', views.InvoiceViewSet, basename='invoice')
 router.register(r'admin_overview', views.AdminOverviewViewSet, basename='admin_overview')
 router.register(r'project_overview', views.ProjectOverviewViewSet, basename='project_overview')
+router.register(r'notification', views.NotificationViewSet, basename='notification')
 
 urlpatterns = [
     path('', include(router.urls)),

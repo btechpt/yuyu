@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from core.models import FlavorPrice, VolumePrice, FloatingIpsPrice, BillingProject, Invoice, InvoiceVolume, \
     InvoiceFloatingIp, InvoiceInstance, DynamicSetting, InvoiceImage, ImagePrice, SnapshotPrice, RouterPrice, \
-    InvoiceSnapshot, InvoiceRouter
+    InvoiceSnapshot, InvoiceRouter, Notification
 
 
 @admin.register(DynamicSetting)
@@ -33,6 +33,7 @@ class RouterPriceAdmin(admin.ModelAdmin):
 @admin.register(SnapshotPrice)
 class SnapshotPriceAdmin(admin.ModelAdmin):
     list_display = ('hourly_price', 'monthly_price')
+
 
 @admin.register(ImagePrice)
 class ImagePriceAdmin(admin.ModelAdmin):
@@ -73,7 +74,12 @@ class InvoiceRouterAdmin(admin.ModelAdmin):
 class InvoiceSnapshotAdmin(admin.ModelAdmin):
     list_display = ('snapshot_id', 'name', 'space_allocation_gb')
 
+
 @admin.register(InvoiceImage)
 class InvoiceImageAdmin(admin.ModelAdmin):
     list_display = ('image_id', 'name', 'space_allocation_gb')
 
+
+@admin.register(Notification)
+class InvoiceImageAdmin(admin.ModelAdmin):
+    list_display = ('project', 'title', 'short_description', 'sent_status')

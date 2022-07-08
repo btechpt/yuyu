@@ -8,14 +8,16 @@ from rest_framework import viewsets, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from api.serializers import InvoiceSerializer, SimpleInvoiceSerializer, BillingProjectSerializer
+from api.serializers import InvoiceSerializer, SimpleInvoiceSerializer, BillingProjectSerializer, NotificationSerializer
 from core.component import component, labels
 from core.component.component import INVOICE_COMPONENT_MODEL
 from core.exception import PriceNotFound
-from core.models import Invoice, BillingProject
+from core.models import Invoice, BillingProject, Notification
+from core.notification import send_notification_from_template
 from core.utils.dynamic_setting import get_dynamic_settings, get_dynamic_setting, set_dynamic_setting, BILLING_ENABLED, \
-    INVOICE_TAX
+    INVOICE_TAX, COMPANY_NAME, COMPANY_LOGO, COMPANY_ADDRESS
 from core.utils.model_utils import InvoiceComponentMixin
+from yuyu import settings
 
 
 def get_generic_model_view_set(model):
@@ -175,6 +177,19 @@ class InvoiceViewSet(viewsets.ModelViewSet):
         if invoice.state == Invoice.InvoiceState.UNPAID:
             invoice.finish()
 
+        send_notification_from_template(
+            project=invoice.project,
+            title=settings.EMAIL_TAG + f' Invoice #{invoice.id} has been Paid',
+            short_description=f'Invoice is paid with total of {invoice.total}',
+            template='invoice.html',
+            context={
+                'invoice': invoice,
+                'company_name': get_dynamic_setting(COMPANY_NAME),
+                'logo': get_dynamic_setting(COMPANY_LOGO),
+                'address': get_dynamic_setting(COMPANY_ADDRESS),
+            }
+        )
+
         serializer = InvoiceSerializer(invoice)
         return Response(serializer.data)
 
@@ -183,6 +198,19 @@ class InvoiceViewSet(viewsets.ModelViewSet):
         invoice = Invoice.objects.filter(id=pk).first()
         if invoice.state == Invoice.InvoiceState.FINISHED:
             invoice.rollback_to_unpaid()
+
+        send_notification_from_template(
+            project=invoice.project,
+            title=settings.EMAIL_TAG + f' Invoice #{invoice.id} in Unpaid',
+            short_description=f'Invoice is Unpaid with total of {invoice.total}',
+            template='invoice.html',
+            context={
+                'invoice': invoice,
+                'company_name': get_dynamic_setting(COMPANY_NAME),
+                'logo': get_dynamic_setting(COMPANY_LOGO),
+                'address': get_dynamic_setting(COMPANY_ADDRESS),
+            }
+        )
 
         serializer = InvoiceSerializer(invoice)
         return Response(serializer.data)
@@ -339,3 +367,25 @@ class ProjectOverviewViewSet(viewsets.ViewSet):
             data['data'].append(sum_of_price)
 
         return Response(data)
+
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    serializer_class = NotificationSerializer
+
+    def get_queryset(self):
+        tenant_id = self.request.query_params.get('tenant_id', None)
+        if tenant_id is None:
+            return Notification.objects.order_by('-created_at')
+        if tenant_id == 0:
+            return Notification.objects.filter(project=None).order_by('-created_at')
+
+        return Notification.objects.filter(project__tenant_id=tenant_id).order_by('-created_at')
+
+    @action(detail=True, methods=['GET'])
+    def resend(self, request, pk):
+        notification = Notification.objects.filter(id=pk).first()
+        notification.send()
+
+        serializer = NotificationSerializer(notification)
+
+        return Response(serializer.data)

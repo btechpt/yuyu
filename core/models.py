@@ -1,12 +1,18 @@
+import re
+
 import math
 
 from django.conf import settings
+from django.core.mail import send_mail
 from django.db import models
 from django.utils import timezone
+from django.utils.html import strip_tags
 from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 
 from core.component import labels
+from core.component.labels import LABEL_INSTANCES, LABEL_IMAGES, LABEL_SNAPSHOTS, LABEL_ROUTERS, LABEL_FLOATING_IPS, \
+    LABEL_VOLUMES
 from core.utils.model_utils import BaseModel, TimestampMixin, PriceMixin, InvoiceComponentMixin
 
 
@@ -103,6 +109,17 @@ class Invoice(BaseModel, TimestampMixin):
 
         return total
 
+    @property
+    def state_str(self):
+        if self.state == Invoice.InvoiceState.IN_PROGRESS:
+            return 'In Progress'
+
+        if self.state == Invoice.InvoiceState.UNPAID:
+            return 'Unpaid'
+
+        if self.state == Invoice.InvoiceState.FINISHED:
+            return 'Finished'
+
     def close(self, date, tax_percentage):
         self.state = Invoice.InvoiceState.UNPAID
         self.end_date = date
@@ -119,6 +136,37 @@ class Invoice(BaseModel, TimestampMixin):
         self.state = Invoice.InvoiceState.UNPAID
         self.finish_date = None
         self.save()
+
+    # Price for individual key
+    @property
+    def instance_price(self):
+        relation_all_row = getattr(self, LABEL_INSTANCES).all()
+        return sum(map(lambda x: x.price_charged, relation_all_row))
+
+    @property
+    def volume_price(self):
+        relation_all_row = getattr(self, LABEL_VOLUMES).all()
+        return sum(map(lambda x: x.price_charged, relation_all_row))
+
+    @property
+    def fip_price(self):
+        relation_all_row = getattr(self, LABEL_FLOATING_IPS).all()
+        return sum(map(lambda x: x.price_charged, relation_all_row))
+
+    @property
+    def router_price(self):
+        relation_all_row = getattr(self, LABEL_ROUTERS).all()
+        return sum(map(lambda x: x.price_charged, relation_all_row))
+
+    @property
+    def snapshot_price(self):
+        relation_all_row = getattr(self, LABEL_SNAPSHOTS).all()
+        return sum(map(lambda x: x.price_charged, relation_all_row))
+
+    @property
+    def images_price(self):
+        relation_all_row = getattr(self, LABEL_IMAGES).all()
+        return sum(map(lambda x: x.price_charged, relation_all_row))
 
 
 # end region
@@ -204,4 +252,38 @@ class InvoiceImage(BaseModel, InvoiceComponentMixin):
     def price_charged(self):
         price_without_allocation = super().price_charged
         return price_without_allocation * math.ceil(self.space_allocation_gb)
+
+
 # end region
+
+class Notification(BaseModel, TimestampMixin):
+    project = models.ForeignKey('BillingProject', on_delete=models.CASCADE, blank=True, null=True)
+    title = models.CharField(max_length=256)
+    short_description = models.CharField(max_length=524)
+    content = models.TextField()
+    sent_status = models.BooleanField()
+    is_read = models.BooleanField()
+
+    def send(self):
+        from core.utils.dynamic_setting import get_dynamic_setting, EMAIL_ADMIN
+
+        def textify(html):
+            # Remove html tags and continuous whitespaces
+            text_only = re.sub('[ \t]+', ' ', strip_tags(html))
+            # Strip single spaces in the beginning of each line
+            return text_only.replace('\n ', '\n').strip()
+
+        recipient = [get_dynamic_setting(EMAIL_ADMIN)]
+        if self.project is not None:
+            recipient.append(self.project.email_notification)
+
+        send_mail(
+            subject=self.title,
+            message=textify(self.content),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=recipient,
+            html_message=self.content,
+        )
+
+        self.sent_status = True
+        self.save()

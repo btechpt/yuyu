@@ -5,3 +5,14 @@ YUYU_NOTIFICATION_TOPICS = ["notifications"]
 CURRENCIES = ('IDR', 'USD')
 DEFAULT_CURRENCY = "IDR"
 
+# Email Setting
+
+EMAIL_TAG = '[YUYU]'
+DEFAULT_FROM_EMAIL = 'no-reply@btech.id'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = '<paste your gmail account here>'
+EMAIL_HOST_PASSWORD = '<paste Google password or app password here>'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True

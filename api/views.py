@@ -389,3 +389,21 @@ class NotificationViewSet(viewsets.ModelViewSet):
         serializer = NotificationSerializer(notification)
 
         return Response(serializer.data)
+
+    @action(detail=True, methods=['GET'])
+    def set_read(self, request, pk):
+        notification = Notification.objects.filter(id=pk).first()
+        notification.is_read = True
+
+        serializer = NotificationSerializer(notification)
+
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['GET'])
+    def set_unread(self, request, pk):
+        notification = Notification.objects.filter(id=pk).first()
+        notification.is_read = False
+
+        serializer = NotificationSerializer(notification)
+
+        return Response(serializer.data)

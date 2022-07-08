@@ -1,4 +1,5 @@
 import logging
+import traceback
 from typing import Mapping, Dict, Iterable
 
 from django.core.management import BaseCommand
@@ -6,7 +7,10 @@ from django.utils import timezone
 
 from core.models import Invoice, InvoiceComponentMixin
 from core.component import component, labels
-from core.utils.dynamic_setting import get_dynamic_setting, BILLING_ENABLED, INVOICE_TAX
+from core.notification import send_notification_from_template, send_notification
+from core.utils.dynamic_setting import get_dynamic_setting, BILLING_ENABLED, INVOICE_TAX, COMPANY_LOGO, COMPANY_NAME, \
+    COMPANY_ADDRESS
+from yuyu import settings
 
 LOG = logging.getLogger("yuyu_new_invoice")
 
@@ -16,15 +20,23 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         print("Processing Invoice")
-        if not get_dynamic_setting(BILLING_ENABLED):
-            return
+        try:
+            if not get_dynamic_setting(BILLING_ENABLED):
+                return
 
-        self.close_date = timezone.now()
-        self.tax_pertentage = get_dynamic_setting(INVOICE_TAX)
+            self.close_date = timezone.now()
+            self.tax_pertentage = get_dynamic_setting(INVOICE_TAX)
 
-        active_invoices = Invoice.objects.filter(state=Invoice.InvoiceState.IN_PROGRESS).all()
-        for active_invoice in active_invoices:
-            self.close_active_invoice(active_invoice)
+            active_invoices = Invoice.objects.filter(state=Invoice.InvoiceState.IN_PROGRESS).all()
+            for active_invoice in active_invoices:
+                self.close_active_invoice(active_invoice)
+        except Exception:
+            send_notification(
+                project=None,
+                title='[Error] Error when processing Invoice',
+                short_description=f'There is an error when Processing Invoice',
+                content=f'There is an error when handling Processing Invoice \n {traceback.format_exc()}',
+            )
         print("Processing Done")
 
     def close_active_invoice(self, active_invoice: Invoice):
@@ -55,3 +67,16 @@ class Command(BaseCommand):
                 handler.roll(active_component, self.close_date, update_payload={
                     "invoice": new_invoice
                 }, fallback_price=True)
+
+        send_notification_from_template(
+            project=active_invoice.project,
+            title=settings.EMAIL_TAG + f' Your Invoice #{active_invoice.id} is Ready',
+            short_description=f'Invoice is ready with total of {active_invoice.total}',
+            template='invoice.html',
+            context={
+                'invoice': active_invoice,
+                'company_name': get_dynamic_setting(COMPANY_NAME),
+                'logo': get_dynamic_setting(COMPANY_LOGO),
+                'address': get_dynamic_setting(COMPANY_ADDRESS),
+            }
+        )

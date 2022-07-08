@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-family: sans-serif;-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;font-size: 10px;-webkit-tap-highlight-color: rgba(0,0,0,0);">
+<head style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;">
+</head>
+<body style="margin-top: 20px;background: #eee;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;margin: 0;font-family: &quot;Helvetica Neue&quot;,Helvetica,Arial,sans-serif;font-size: 14px;line-height: 1.42857143;color: #333;background-color: #fff;">
+    <div class="container" style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding-right: 15px;padding-left: 15px;margin-right: auto;margin-left: auto;">
+        <div class="row" style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;margin-right: -15px;margin-left: -15px;">
+            <!-- BEGIN INVOICE -->
+            <div class="col-xs-12" style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;position: relative;min-height: 1px;padding-right: 15px;padding-left: 15px;float: left;width: 100%;">
+                <div class="grid invoice" style="padding: 30px;position: relative;width: 100%;background: #fff;color: #666666;border-radius: 2px;margin-bottom: 25px;box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;">
+                    <div class="grid-body" style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;">
+                        <div class="invoice-title" style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;">
+                            <div class="row" style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;margin-right: -15px;margin-left: -15px;">
+                                <div class="col-xs-12" style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;position: relative;min-height: 1px;padding-right: 15px;padding-left: 15px;float: left;width: 100%;">
+                                    <img src="{{ logo }}" alt="" height="50" style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;border: 0;vertical-align: middle;page-break-inside: avoid;max-width: 100%!important;">
+                                    <!-- <img src="https://www.seekpng.com/png/detail/246-2468199_logo-placeholder-png-white.png" alt="" height="35"> -->
+                                </div>
+                            </div>
+                            <br style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;">
+                            <div class="row" style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;margin-right: -15px;margin-left: -15px;">
+                                <div class="col-xs-12" style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;position: relative;min-height: 1px;padding-right: 15px;padding-left: 15px;float: left;width: 100%;">
+                                    <h2 style="margin-top: 0px;line-height: 0.8em;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;orphans: 3;widows: 3;page-break-after: avoid;font-family: inherit;font-weight: 500;color: inherit;margin-bottom: 10px;font-size: 30px;">invoice<br style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;">
+                                    <span class="small" style="font-weight: 300;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-size: 65%;line-height: 1;color: #777;">order #{{ invoice.id }}</span></h2>
+                                </div>
+                            </div>
+                        </div>
+                        <hr style="margin-top: 10px;border-color: #ddd;-webkit-box-sizing: content-box;-moz-box-sizing: content-box;box-sizing: content-box;height: 0;margin-bottom: 20px;border: 0;border-top: 1px solid #eee;">
+                        <div class="row" style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;margin-right: -15px;margin-left: -15px;">
+                            <div class="col-xs-6" style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;position: relative;min-height: 1px;padding-right: 15px;padding-left: 15px;float: left;width: 50%;">
+                                <address style="max-width: 30%;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;margin-bottom: 20px;font-style: normal;line-height: 1.42857143;">
+                                    {{ address }}
+                                </address>
+                            </div>
+                            <div class="col-xs-6 text-right" style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;text-align: right;position: relative;min-height: 1px;padding-right: 15px;padding-left: 15px;float: left;width: 50%;">
+                                <address style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;margin-bottom: 20px;font-style: normal;line-height: 1.42857143;">
+                                    <strong style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-weight: 700;">Invoice Month:</strong><br style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;">
+                                    {{ invoice.start_date | date:"M Y" }}
+                                    <br style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;">
+                                    <br style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;">
+                                    <strong style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-weight: 700;">Invoice State:</strong><br style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;">
+                                    {{ invoice.state_str }}
+                                </address>
+                            </div>
+                        </div>
+                        <div class="row" style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;margin-right: -15px;margin-left: -15px;">
+                            <div class="col-md-12" style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;position: relative;min-height: 1px;padding-right: 15px;padding-left: 15px;width: 100%;">
+                                <h3 style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;orphans: 3;widows: 3;page-break-after: avoid;font-family: inherit;font-weight: 500;line-height: 1.1;color: inherit;margin-top: 20px;margin-bottom: 10px;font-size: 24px;">ORDER SUMMARY</h3>
+                                <table class="table table-striped" style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;border-spacing: 0;border-collapse: collapse!important;background-color: transparent;width: 100%;max-width: 100%;margin-bottom: 20px;">
+                                    <thead style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;display: table-header-group;">
+                                        <tr class="line" style="border-bottom: 1px solid #ccc;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;page-break-inside: avoid;">
+                                            <td style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;"><strong style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-weight: 700;">#</strong></td>
+                                            <td width="70%" style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;"><strong style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-weight: 700;">COMPONENT</strong></td>
+                                            <td class="text-right" style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;text-align: right;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;"><strong style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-weight: 700;">TOTAL COST</strong></td>
+                                        </tr>
+                                    </thead>
+                                    <tbody style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;">
+                                        <tr style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;page-break-inside: avoid;">
+                                            <td style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;">1</td>
+                                            <td style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;"><strong style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-weight: 700;">Instance</strong></td>
+                                            <td class="text-right" style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;text-align: right;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;">{{ invoice.instance_price }}</td>
+                                        </tr>
+                                        <tr style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;page-break-inside: avoid;">
+                                            <td style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;">2</td>
+                                            <td style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;"><strong style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-weight: 700;">Volume</strong></td>
+                                            <td class="text-right" style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;text-align: right;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;">{{ invoice.volume_price }}</td>
+                                        </tr>
+                                        <tr style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;page-break-inside: avoid;">
+                                            <td style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;">3</td>
+                                            <td style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;"><strong style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-weight: 700;">Floating IP</strong></td>
+                                            <td class="text-right" style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;text-align: right;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;">{{ invoice.fip_price }}</td>
+                                        </tr>
+                                        <tr style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;page-break-inside: avoid;">
+                                            <td style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;">4</td>
+                                            <td style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;"><strong style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-weight: 700;">Router</strong></td>
+                                            <td class="text-right" style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;text-align: right;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;">{{ invoice.router_price }}</td>
+                                        </tr>
+                                        <tr class="line" style="border-bottom: 1px solid #ccc;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;page-break-inside: avoid;">
+                                            <td style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;">5</td>
+                                            <td style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;"><strong style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-weight: 700;">Snapshot</strong></td>
+                                            <td class="text-right" style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;text-align: right;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;">{{ invoice.snapshot_price }}</td>
+                                        </tr>
+                                        <tr style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;page-break-inside: avoid;">
+                                            <td colspan="2" class="text-right" style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;text-align: right;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;"><strong style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-weight: 700;">Subtotal</strong></td>
+                                            <td class="text-right" style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;text-align: right;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;"><strong style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-weight: 700;">{{ invoice.subtotal }}</strong></td>
+                                        </tr>
+                                        <tr style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;page-break-inside: avoid;">
+                                            <td colspan="2" class="text-right" style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;text-align: right;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;"><strong style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-weight: 700;">Tax</strong></td>
+                                            <td class="text-right" style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;text-align: right;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;"><strong style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-weight: 700;">{{ invoice.tax }}</strong></td>
+                                        </tr>
+                                        <tr style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;page-break-inside: avoid;">
+                                            <td colspan="2" class="text-right" style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;text-align: right;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;"><strong style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-weight: 700;">Total</strong></td>
+                                            <td class="text-right" style="border: none;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;padding: 8px;text-align: right;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;background-color: #fff!important;"><strong style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;font-weight: 700;">{{ invoice.total }}</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>									
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END INVOICE -->
+        </div>
+    </div>
+</body>
+</html>

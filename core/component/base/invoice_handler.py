@@ -6,6 +6,7 @@ from djmoney.money import Money
 
 from core.exception import PriceNotFound
 from core.models import InvoiceComponentMixin, PriceMixin
+from core.notification import send_notification
 
 
 class InvoiceHandler(metaclass=abc.ABCMeta):
@@ -25,7 +26,14 @@ class InvoiceHandler(metaclass=abc.ABCMeta):
             price = self.get_price(payload)
             if price is None:
                 raise PriceNotFound()
-        except PriceNotFound:
+        except PriceNotFound as e:
+            send_notification(
+                project=None,
+                title=f'{settings.EMAIL_TAG} [Error] Price not found when create invoice',
+                short_description=f'Price not found for {e.identifier} with payload {payload}',
+                content=f'Price not found or {e.identifier} with payload {payload}. Will use fallback price as 0.',
+            )
+
             if fallback_price:
                 price = PriceMixin()
                 price.hourly_price = Money(amount=0, currency=settings.DEFAULT_CURRENCY)
@@ -74,15 +82,25 @@ class InvoiceHandler(metaclass=abc.ABCMeta):
             price = self.get_price(self.get_price_dependency_from_instance(instance))
             if price is None:
                 raise PriceNotFound()
-        except PriceNotFound:
+
+            hourly_price = price.hourly_price
+            monthly_price = price.monthly_price
+        except PriceNotFound as e:
+            send_notification(
+                project=None,
+                title=f'{settings.EMAIL_TAG} [Error] Price not found when rolling invoice',
+                short_description=f'Please check your Price configuration. Error on ID {getattr(instance, self.KEY_FIELD)}',
+                content=f'Please check your Price configuration fro {e.identifier}. Error on ID {getattr(instance, self.KEY_FIELD)} for '
+                        f'invoice {getattr(instance, "invoice").id}',
+            )
+
             if fallback_price:
-                price = PriceMixin()
-                price.hourly_price = Money(amount=0, currency=settings.DEFAULT_CURRENCY)
-                price.monthly_price = Money(amount=0, currency=settings.DEFAULT_CURRENCY)
+                hourly_price = Money(amount=0, currency=settings.DEFAULT_CURRENCY)
+                monthly_price = Money(amount=0, currency=settings.DEFAULT_CURRENCY)
             else:
                 raise
-        instance.hourly_price = price.hourly_price
-        instance.monthly_price = price.monthly_price
+        instance.hourly_price = hourly_price
+        instance.monthly_price = monthly_price
         instance.save()
 
         return instance

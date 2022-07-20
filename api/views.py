@@ -381,6 +381,13 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
         return Notification.objects.filter(project__tenant_id=tenant_id).order_by('-created_at')
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.is_read = True
+        instance.save()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
     @action(detail=True, methods=['GET'])
     def resend(self, request, pk):
         notification = Notification.objects.filter(id=pk).first()

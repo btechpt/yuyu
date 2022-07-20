@@ -67,7 +67,8 @@ class BillingProjectSerializer(serializers.ModelSerializer):
 
 class NotificationSerializer(serializers.ModelSerializer):
     project = BillingProjectSerializer()
+    recipient = serializers.CharField()
 
     class Meta:
         model = Notification
-        fields = ['id', 'project', 'title', 'short_description', 'content', 'sent_status', 'is_read']
+        fields = ['id', 'project', 'title', 'short_description', 'content', 'sent_status', 'is_read', 'created_at', 'recipient']

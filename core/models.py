@@ -264,6 +264,11 @@ class Notification(BaseModel, TimestampMixin):
     sent_status = models.BooleanField()
     is_read = models.BooleanField()
 
+    def recipient(self):
+        if self.project:
+            return self.project.email_notification
+        return 'Admin'
+
     def send(self):
         from core.utils.dynamic_setting import get_dynamic_setting, EMAIL_ADMIN
 

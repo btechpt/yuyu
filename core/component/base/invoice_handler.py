@@ -26,6 +26,9 @@ class InvoiceHandler(metaclass=abc.ABCMeta):
             price = self.get_price(payload)
             if price is None:
                 raise PriceNotFound()
+
+            hourly_price = price.hourly_price
+            monthly_price = price.monthly_price
         except PriceNotFound as e:
             send_notification(
                 project=None,
@@ -35,14 +38,13 @@ class InvoiceHandler(metaclass=abc.ABCMeta):
             )
 
             if fallback_price:
-                price = PriceMixin()
-                price.hourly_price = Money(amount=0, currency=settings.DEFAULT_CURRENCY)
-                price.monthly_price = Money(amount=0, currency=settings.DEFAULT_CURRENCY)
+                hourly_price = Money(amount=0, currency=settings.DEFAULT_CURRENCY)
+                monthly_price = Money(amount=0, currency=settings.DEFAULT_CURRENCY)
             else:
                 raise
 
-        payload['hourly_price'] = price.hourly_price
-        payload['monthly_price'] = price.monthly_price
+        payload['hourly_price'] = hourly_price
+        payload['monthly_price'] = monthly_price
 
         self.INVOICE_CLASS.objects.create(**payload)
 

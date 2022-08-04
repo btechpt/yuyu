@@ -401,6 +401,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
     def set_read(self, request, pk):
         notification = Notification.objects.filter(id=pk).first()
         notification.is_read = True
+        notification.save()
 
         serializer = NotificationSerializer(notification)
 
@@ -410,6 +411,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
     def set_unread(self, request, pk):
         notification = Notification.objects.filter(id=pk).first()
         notification.is_read = False
+        notification.save()
 
         serializer = NotificationSerializer(notification)
 

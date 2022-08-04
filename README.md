@@ -176,3 +176,42 @@ Replace $yuyu_dir with the directory of where yuyu is located. Example
 ```
 1 0 1 * * /var/yuyu/bin/process_invoice.sh
 ```
+
+# Updating Yuyu
+
+To update Yuyu manually, you can just pull the latest code
+
+```bash
+git pull release/xx.xx
+```
+
+Activate the virtualenv.
+
+```bash
+source env/bin/activate
+```
+
+Change the setting if needed. 
+
+```bash
+nano yuyu/local_settings.py
+```
+
+Update the python package.
+
+```bash
+pip install -r requirements.txt
+```
+
+Run database migration
+
+```bash
+python manage.py migrate
+```
+
+Restart all the service
+
+```bash
+systemctl restart yuyu_api
+systemctl restart yuyu_event_monitor
+```

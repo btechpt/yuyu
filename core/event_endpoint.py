@@ -4,6 +4,7 @@ import traceback
 from oslo_messaging import NotificationResult
 
 from core.component import component
+from core.component.project.event_handler import ProjectEventHandler
 from core.notification import send_notification
 from core.utils.dynamic_setting import get_dynamic_settings, BILLING_ENABLED, get_dynamic_setting
 from yuyu import settings
@@ -17,6 +18,9 @@ class EventEndpoint(object):
             cls(component.INVOICE_HANDLER[label]) for label, cls in component.EVENT_HANDLER.items()
         ]
 
+        # Add handler for project event
+        self.event_handler.append(ProjectEventHandler())
+
     def info(self, ctxt, publisher_id, event_type, payload, metadata):
         LOG.info("=== Event Received ===")
         LOG.info("Event Type: " + str(event_type))
@@ -25,7 +29,6 @@ class EventEndpoint(object):
         if not get_dynamic_setting(BILLING_ENABLED):
             return NotificationResult.HANDLED
 
-        # TODO: Error Handling
         try:
             for handler in self.event_handler:
                 handler.handle(event_type, payload)

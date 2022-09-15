@@ -43,7 +43,7 @@ class Command(BaseCommand):
 
     def notify_server(self, transport, topics):
         endpoints = [EventEndpoint()]
-        targets = list(map(lambda t: messaging.Target(topic=t), topics))
+        targets = list(map(lambda t: messaging.Target(topic=t, fanout=True), topics))
         server = notify.get_notification_listener(
             transport,
             targets,
@@ -54,13 +54,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         url = settings.YUYU_NOTIFICATION_URL
-        transport = messaging.get_notification_transport(cfg.CONF,
-                                                         url=url)
 
         # oslo.config defaults
         cfg.CONF.heartbeat_interval = 5
         cfg.CONF.prog = os.path.basename(__file__)
-        cfg.CONF.project = 'yuyu'
+        cfg.CONF.project = 'xxx'
+
+        transport = messaging.get_notification_transport(cfg.CONF,
+                                                         url=url)
 
         signal.signal(signal.SIGTERM, self.signal_handler)
         signal.signal(signal.SIGINT, self.signal_handler)

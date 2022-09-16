@@ -35,6 +35,7 @@ You need to enable notification for this openstack service:
 - Nova (nova.conf)
 - Cinder (cinder.conf)
 - Neutron (neutron.conf)
+- Keystone (keystone.conf)
 
 ### Nova
 Add configuration below on `[oslo_messaging_notifications]`
@@ -51,7 +52,7 @@ notify_on_state_change = vm_and_task_state
 notification_format = unversioned
 ```
 
-### Cinder & Neutron
+### Cinder & Neutron & Keystone
 
 Add configuration below on `[oslo_messaging_notifications]`
 

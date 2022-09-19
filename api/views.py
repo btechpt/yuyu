@@ -252,11 +252,11 @@ class AdminOverviewViewSet(viewsets.ViewSet):
             'data': [],
         }
         for k, v in INVOICE_COMPONENT_MODEL.items():
-            sum_of_price = sum([q.price_charged.amount for q in
+            sum_of_price = sum([q.price_charged for q in
                                 v.objects.filter(invoice__state=Invoice.InvoiceState.IN_PROGRESS).all()])
 
-            data['label'].append(k)
-            data['data'].append(sum_of_price)
+            data['label'].append(k + ' (' + str(sum_of_price.currency) + ')')
+            data['data'].append(sum_of_price.amount)
 
         return Response(data)
 
@@ -267,11 +267,11 @@ class AdminOverviewViewSet(viewsets.ViewSet):
             'data': [],
         }
         for k, v in INVOICE_COMPONENT_MODEL.items():
-            sum_of_price = sum([q.price_charged.amount for q in
+            sum_of_price = sum([q.price_charged for q in
                                 v.objects.filter(invoice__state=Invoice.InvoiceState.IN_PROGRESS, end_date=None).all()])
 
-            data['label'].append(k)
-            data['data'].append(sum_of_price)
+            data['label'].append(k + ' (' + str(sum_of_price.currency) + ')')
+            data['data'].append(sum_of_price.amount)
 
         return Response(data)
 
@@ -341,12 +341,12 @@ class ProjectOverviewViewSet(viewsets.ViewSet):
             'data': [],
         }
         for k, v in INVOICE_COMPONENT_MODEL.items():
-            sum_of_price = sum([q.price_charged.amount for q in
+            sum_of_price = sum([q.price_charged for q in
                                 v.objects.filter(invoice__project=project,
                                                  invoice__state=Invoice.InvoiceState.IN_PROGRESS).all()])
 
-            data['label'].append(k)
-            data['data'].append(sum_of_price)
+            data['label'].append(k + ' (' + str(sum_of_price.currency) + ')')
+            data['data'].append(sum_of_price.amount)
 
         return Response(data)
 
@@ -359,12 +359,12 @@ class ProjectOverviewViewSet(viewsets.ViewSet):
             'data': [],
         }
         for k, v in INVOICE_COMPONENT_MODEL.items():
-            sum_of_price = sum([q.price_charged.amount for q in
+            sum_of_price = sum([q.price_charged for q in
                                 v.objects.filter(invoice__project=project,
                                                  invoice__state=Invoice.InvoiceState.IN_PROGRESS, end_date=None).all()])
 
-            data['label'].append(k)
-            data['data'].append(sum_of_price)
+            data['label'].append(k + ' (' + str(sum_of_price.currency) + ')')
+            data['data'].append(sum_of_price.amount)
 
         return Response(data)
 

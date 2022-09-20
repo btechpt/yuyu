@@ -1,3 +1,4 @@
+import logging
 import re
 
 import math
@@ -14,6 +15,8 @@ from core.component import labels
 from core.component.labels import LABEL_INSTANCES, LABEL_IMAGES, LABEL_SNAPSHOTS, LABEL_ROUTERS, LABEL_FLOATING_IPS, \
     LABEL_VOLUMES
 from core.utils.model_utils import BaseModel, TimestampMixin, PriceMixin, InvoiceComponentMixin
+
+LOG = logging.getLogger("yuyu")
 
 
 # region Dynamic Setting
@@ -271,24 +274,27 @@ class Notification(BaseModel, TimestampMixin):
 
     def send(self):
         from core.utils.dynamic_setting import get_dynamic_setting, EMAIL_ADMIN
+        try:
+            def textify(html):
+                # Remove html tags and continuous whitespaces
+                text_only = re.sub('[ \t]+', ' ', strip_tags(html))
+                # Strip single spaces in the beginning of each line
+                return text_only.replace('\n ', '\n').strip()
 
-        def textify(html):
-            # Remove html tags and continuous whitespaces
-            text_only = re.sub('[ \t]+', ' ', strip_tags(html))
-            # Strip single spaces in the beginning of each line
-            return text_only.replace('\n ', '\n').strip()
+            recipient = [get_dynamic_setting(EMAIL_ADMIN)]
+            if self.project is not None:
+                recipient.append(self.project.email_notification)
 
-        recipient = [get_dynamic_setting(EMAIL_ADMIN)]
-        if self.project is not None:
-            recipient.append(self.project.email_notification)
-
-        send_mail(
-            subject=self.title,
-            message=textify(self.content),
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=recipient,
-            html_message=self.content,
-        )
-
-        self.sent_status = True
-        self.save()
+            send_mail(
+                subject=self.title,
+                message=textify(self.content),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=recipient,
+                html_message=self.content,
+            )
+            self.sent_status = True
+            self.save()
+        except Exception as e:
+            LOG.exception('Error sending notification')
+            self.sent_status = False
+            self.save()

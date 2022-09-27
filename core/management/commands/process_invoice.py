@@ -76,7 +76,6 @@ class Command(BaseCommand):
             context={
                 'invoice': active_invoice,
                 'company_name': get_dynamic_setting(COMPANY_NAME),
-                'logo': get_dynamic_setting(COMPANY_LOGO),
                 'address': get_dynamic_setting(COMPANY_ADDRESS),
             }
         )

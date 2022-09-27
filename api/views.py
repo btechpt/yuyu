@@ -4,6 +4,7 @@ import dateutil.parser
 import pytz
 from django.db import transaction
 from django.utils import timezone
+from djmoney.settings import DEFAULT_CURRENCY
 from rest_framework import viewsets, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -185,7 +186,6 @@ class InvoiceViewSet(viewsets.ModelViewSet):
             context={
                 'invoice': invoice,
                 'company_name': get_dynamic_setting(COMPANY_NAME),
-                'logo': get_dynamic_setting(COMPANY_LOGO),
                 'address': get_dynamic_setting(COMPANY_ADDRESS),
             }
         )
@@ -207,7 +207,6 @@ class InvoiceViewSet(viewsets.ModelViewSet):
             context={
                 'invoice': invoice,
                 'company_name': get_dynamic_setting(COMPANY_NAME),
-                'logo': get_dynamic_setting(COMPANY_LOGO),
                 'address': get_dynamic_setting(COMPANY_ADDRESS),
             }
         )

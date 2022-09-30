@@ -4,6 +4,7 @@ import dateutil.parser
 import pytz
 from django.db import transaction
 from django.utils import timezone
+from djmoney.money import Money
 from djmoney.settings import DEFAULT_CURRENCY
 from rest_framework import viewsets, serializers
 from rest_framework.decorators import action
@@ -254,6 +255,7 @@ class AdminOverviewViewSet(viewsets.ViewSet):
             sum_of_price = sum([q.price_charged for q in
                                 v.objects.filter(invoice__state=Invoice.InvoiceState.IN_PROGRESS).all()])
 
+            sum_of_price = sum_of_price or Money(amount=0, currency=settings.DEFAULT_CURRENCY)
             data['label'].append(k + ' (' + str(sum_of_price.currency) + ')')
             data['data'].append(sum_of_price.amount)
 
@@ -269,6 +271,7 @@ class AdminOverviewViewSet(viewsets.ViewSet):
             sum_of_price = sum([q.price_charged for q in
                                 v.objects.filter(invoice__state=Invoice.InvoiceState.IN_PROGRESS, end_date=None).all()])
 
+            sum_of_price = sum_of_price or Money(amount=0, currency=settings.DEFAULT_CURRENCY)
             data['label'].append(k + ' (' + str(sum_of_price.currency) + ')')
             data['data'].append(sum_of_price.amount)
 
@@ -344,6 +347,7 @@ class ProjectOverviewViewSet(viewsets.ViewSet):
                                 v.objects.filter(invoice__project=project,
                                                  invoice__state=Invoice.InvoiceState.IN_PROGRESS).all()])
 
+            sum_of_price = sum_of_price or Money(amount=0, currency=settings.DEFAULT_CURRENCY)
             data['label'].append(k + ' (' + str(sum_of_price.currency) + ')')
             data['data'].append(sum_of_price.amount)
 
@@ -362,6 +366,7 @@ class ProjectOverviewViewSet(viewsets.ViewSet):
                                 v.objects.filter(invoice__project=project,
                                                  invoice__state=Invoice.InvoiceState.IN_PROGRESS, end_date=None).all()])
 
+            sum_of_price = sum_of_price or Money(amount=0, currency=settings.DEFAULT_CURRENCY)
             data['label'].append(k + ' (' + str(sum_of_price.currency) + ')')
             data['data'].append(sum_of_price.amount)
 

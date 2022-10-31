@@ -19,8 +19,8 @@ class TimestampMixin(models.Model):
 
 
 class PriceMixin(models.Model):
-    hourly_price = MoneyField(max_digits=10, decimal_places=0)
-    monthly_price = MoneyField(max_digits=10, decimal_places=0, default=None, blank=True, null=True)
+    hourly_price = MoneyField(max_digits=10)
+    monthly_price = MoneyField(max_digits=10, default=None, blank=True, null=True)
 
     class Meta:
         abstract = True

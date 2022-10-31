@@ -1,0 +1,30 @@
+v1.0.1
+---------------------------
+- Fix: Support decimal in price (database migration needed)
+- Fix: New instance usage not counted when add new project after billing enabled
+
+v1.0
+---------------------------
+- Bug fixing for handling price not found
+- Upload logo for your invoice
+- Add currency to overview
+- Email SMTP setting now optional, it will ignore any error regarding sending email. You can resend it on notification center
+- Change invoice email format
+- Handle new project when billing already started (you need to update your keystone.conf)
+
+
+v1.0-beta
+----------------------------
+- Setting company profile
+- Send invoice to email
+- Notification center
+- Update invoice format
+
+
+v1.0-alpha
+----------------------------
+- Price Configuration
+- Project Overview
+- Project Invoice
+- Usage Cost
+- Billing Settings

@@ -1,6 +1,7 @@
 import logging
 
-from core.models import BillingProject
+from core.models import BillingProject, Invoice
+from django.utils import timezone
 
 LOG = logging.getLogger("yuyu_notification")
 
@@ -13,3 +14,14 @@ class ProjectEventHandler:
             project = BillingProject()
             project.tenant_id = new_project_id
             project.save()
+            LOG.info("Creating invoice for " + new_project_id)
+            self.init_first_invoice(project)
+
+    def init_first_invoice(self, project):
+        date_today = timezone.now()
+        month_first_day = date_today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        Invoice.objects.create(
+            project=project,
+            start_date=month_first_day,
+            state=Invoice.InvoiceState.IN_PROGRESS
+        )

@@ -84,8 +84,8 @@ class Invoice(BaseModel, TimestampMixin):
     end_date = models.DateTimeField(default=None, blank=True, null=True)
     finish_date = models.DateTimeField(default=None, blank=True, null=True)
     state = models.IntegerField(choices=InvoiceState.choices)
-    tax = MoneyField(max_digits=10, decimal_places=0, default=None, blank=True, null=True)
-    total = MoneyField(max_digits=10, decimal_places=0, default=None, blank=True, null=True)
+    tax = MoneyField(max_digits=10, default=None, blank=True, null=True)
+    total = MoneyField(max_digits=10, default=None, blank=True, null=True)
 
     @property
     def subtotal(self):

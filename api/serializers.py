@@ -1,4 +1,5 @@
 from djmoney.contrib.django_rest_framework import MoneyField
+from djmoney.settings import DECIMAL_PLACES
 from rest_framework import serializers
 
 from api import custom_validator
@@ -8,7 +9,7 @@ from core.component import component
 
 class InvoiceComponentSerializer(serializers.ModelSerializer):
     adjusted_end_date = serializers.DateTimeField()
-    price_charged = MoneyField(max_digits=10, decimal_places=0)
+    price_charged = MoneyField(max_digits=10, decimal_places=DECIMAL_PLACES)
     price_charged_currency = serializers.CharField(source="price_charged.currency")
 
 
@@ -30,9 +31,9 @@ def generate_invoice_component_serializer(model):
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
-    subtotal = MoneyField(max_digits=10, decimal_places=0)
+    subtotal = MoneyField(max_digits=10, decimal_places=DECIMAL_PLACES)
     subtotal_currency = serializers.CharField(source="subtotal.currency")
-    total = MoneyField(max_digits=10, decimal_places=0)
+    total = MoneyField(max_digits=10, decimal_places=DECIMAL_PLACES)
     total_currency = serializers.CharField(source="total.currency", required=False)
 
     def __init__(self, *args, **kwargs):
@@ -46,9 +47,9 @@ class InvoiceSerializer(serializers.ModelSerializer):
 
 
 class SimpleInvoiceSerializer(serializers.ModelSerializer):
-    subtotal = MoneyField(max_digits=10, decimal_places=0)
+    subtotal = MoneyField(max_digits=10, decimal_places=DECIMAL_PLACES)
     subtotal_currency = serializers.CharField(source="subtotal.currency")
-    total = MoneyField(max_digits=10, decimal_places=0)
+    total = MoneyField(max_digits=10, decimal_places=DECIMAL_PLACES)
     total_currency = serializers.CharField(source="total.currency", required=False)
 
     class Meta:

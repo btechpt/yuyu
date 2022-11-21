@@ -1,6 +1,7 @@
 from djmoney.contrib.django_rest_framework import MoneyField
 from rest_framework import serializers
 
+from api import custom_validator
 from core.models import Invoice, BillingProject, Notification
 from core.component import component
 
@@ -58,7 +59,7 @@ class SimpleInvoiceSerializer(serializers.ModelSerializer):
 
 class BillingProjectSerializer(serializers.ModelSerializer):
     tenant_id = serializers.CharField(required=False, read_only=True)
-    email_notification = serializers.EmailField(required=False)
+    email_notification = serializers.CharField(required=False, validators=[custom_validator.email_list])
 
     class Meta:
         model = BillingProject
@@ -71,4 +72,5 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notification
-        fields = ['id', 'project', 'title', 'short_description', 'content', 'sent_status', 'is_read', 'created_at', 'recipient']
+        fields = ['id', 'project', 'title', 'short_description', 'content', 'sent_status', 'is_read', 'created_at',
+                  'recipient']

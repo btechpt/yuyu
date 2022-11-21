@@ -5,7 +5,6 @@ import pytz
 from django.db import transaction
 from django.utils import timezone
 from djmoney.money import Money
-from djmoney.settings import DEFAULT_CURRENCY
 from rest_framework import viewsets, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -17,7 +16,7 @@ from core.exception import PriceNotFound
 from core.models import Invoice, BillingProject, Notification
 from core.notification import send_notification_from_template
 from core.utils.dynamic_setting import get_dynamic_settings, get_dynamic_setting, set_dynamic_setting, BILLING_ENABLED, \
-    INVOICE_TAX, COMPANY_NAME, COMPANY_LOGO, COMPANY_ADDRESS
+    INVOICE_TAX, COMPANY_NAME, COMPANY_ADDRESS
 from core.utils.model_utils import InvoiceComponentMixin
 from yuyu import settings
 

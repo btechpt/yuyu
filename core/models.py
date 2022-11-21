@@ -1,7 +1,6 @@
 import logging
-import re
-
 import math
+import re
 
 from django.conf import settings
 from django.core.mail import send_mail
@@ -68,7 +67,7 @@ class ImagePrice(BaseModel, TimestampMixin, PriceMixin):
 # region Invoicing
 class BillingProject(BaseModel, TimestampMixin):
     tenant_id = models.CharField(max_length=256)
-    email_notification = models.EmailField(max_length=256, blank=True, null=True)
+    email_notification = models.CharField(max_length=512, blank=True, null=True)
 
     def __str__(self):
         return self.tenant_id
@@ -268,7 +267,7 @@ class Notification(BaseModel, TimestampMixin):
     is_read = models.BooleanField()
 
     def recipient(self):
-        if self.project:
+        if self.project and self.project.email_notification:
             return self.project.email_notification
         return 'Admin'
 
@@ -281,9 +280,9 @@ class Notification(BaseModel, TimestampMixin):
                 # Strip single spaces in the beginning of each line
                 return text_only.replace('\n ', '\n').strip()
 
-            recipient = [get_dynamic_setting(EMAIL_ADMIN)]
-            if self.project is not None:
-                recipient.append(self.project.email_notification)
+            recipient = get_dynamic_setting(EMAIL_ADMIN).split(",")
+            if self.project and self.project.email_notification:
+                recipient += self.project.email_notification.split(",")
 
             send_mail(
                 subject=self.title,

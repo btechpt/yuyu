@@ -1,3 +1,13 @@
+
+# Repository Moved
+This project has been moved to a new organization! https://github.com/Yuyu-billing
+
+See our new home at:
+- https://yuyu-billing.dev/
+- https://github.com/Yuyu-billing/yuyu
+- https://github.com/Yuyu-billing/yuyu_dashboard
+
+
 # Yuyu
 
 Yuyu provide ability to manage openstack billing by listening to every openstack event. Yuyu is a required component to use Yuyu Dashboard. There are 3 main component in Yuyu: API, Cron, Event Monitor 
